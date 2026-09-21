@@ -1,184 +1,158 @@
 @extends('layouts.app')
 
-@section('title', 'Cetak Laporan')
+@section('title', 'Pusat Cetak & Download Laporan')
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/admin/export-page.css') }}">
+@endpush
 
 @section('content')
-<div class="container py-4 py-md-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0 report-card">
-                <div class="card-header bg-white pt-4 pb-2 border-0 text-center">
-                    <div class="icon-circle mb-3">
-                        <i class="fas fa-file-invoice text-primary"></i>
-                    </div>
-                    <h4 class="mb-1 font-weight-bold" style="color: #333;">Pengaturan Cetak Laporan</h4>
-                    <p class="text-muted small px-4">Filter data mahasiswa magang sesuai kebutuhan untuk menghasilkan laporan yang akurat.</p>
+<div class="export-page-wrapper">
+    <div class="export-container">
+        <!-- Back Button Navigation -->
+        <div class="top-nav-bar">
+            <a href="{{ route('admin.laporan.index') }}" class="btn-back">
+                <i class="fas fa-arrow-left"></i><span>Kembali ke Laporan Mahasiswa</span>
+            </a>
+        </div>
+
+        <div class="export-card">
+            <!-- Header -->
+            <div class="export-header">
+                <div class="header-icon-box">
+                    <i class="fas fa-file-export"></i>
                 </div>
+                <div class="header-text-content">
+                    <h2 class="export-title">Pusat Cetak & Unduh Laporan</h2>
+                    <p class="export-description">
+                        Kustomisasi parameter filter untuk mengunduh arsip data mahasiswa magang dalam format dokumen resmi (PDF) atau lembar kerja (Excel).
+                    </p>
+                </div>
+                <div class="header-meta-badge">
+                    <span class="meta-label">Total Arsip</span>
+                    <strong class="meta-count">{{ $total_data }} Mahasiswa</strong>
+                </div>
+            </div>
 
-                <div class="card-body px-3 px-md-5 pb-5">
-                    <form id="formExport" method="GET">
-                        <div class="row">
-                            <div class="col-12 form-group mb-4">
-                                <label class="form-label-custom"><i class="fas fa-toggle-on mr-2"></i>Status Mahasiswa</label>
-                                <select name="status" class="form-control custom-select-box">
-                                    <option value="">Semua Status</option>
-                                    <option value="1">Aktif</option>
-                                    <option value="0">Tidak Aktif</option>
-                                </select>
-                            </div>
+            <!-- Form Body -->
+            <div class="export-body">
+                <form id="formExport" method="GET" action="{{ route('admin.laporan.export.pdf') }}">
+                    <div class="form-section-title">
+                        <i class="fas fa-sliders-h"></i> Parameter Penyaringan Data
+                    </div>
 
-                            <div class="col-12 form-group mb-4">
-                                <label class="form-label-custom"><i class="fas fa-briefcase mr-2"></i>Divisi Magang</label>
-                                <select name="divisi_id" class="form-control custom-select-box">
-                                    <option value="">Semua Divisi</option>
+                    <div class="filter-controls-grid">
+                        <!-- Filter Divisi -->
+                        <div class="export-form-group">
+                            <label class="export-label">
+                                <i class="fas fa-building"></i> Divisi Magang
+                            </label>
+                            <div class="select-wrapper">
+                                <select name="divisi_id" class="export-select">
+                                    <option value="">Semua Divisi (Seluruh Unit)</option>
                                     @foreach($divisi as $d)
                                         <option value="{{ $d->id }}">{{ $d->nama_divisi }}</option>
                                     @endforeach
                                 </select>
                             </div>
+                        </div>
 
-                            <div class="col-6 form-group mb-5">
-                                <label class="form-label-custom"><i class="fas fa-calendar-alt mr-2"></i>Bulan</label>
-                                <select name="bulan" class="form-control custom-select-box">
-                                    <option value="">Semua</option>
-                                    @foreach(range(1,12) as $m)
-                                        <option value="{{ $m }}">{{ date('F', mktime(0,0,0,$m,1)) }}</option>
+                        <!-- Filter Status -->
+                        <div class="export-form-group">
+                            <label class="export-label">
+                                <i class="fas fa-toggle-on"></i> Status Kepesertaan
+                            </label>
+                            <div class="select-wrapper">
+                                <select name="status" class="export-select">
+                                    <option value="">Semua Status (Aktif & Selesai)</option>
+                                    <option value="1">Hanya Mahasiswa Aktif</option>
+                                    <option value="0">Hanya Mahasiswa Selesai / Nonaktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bulan -->
+                        <div class="export-form-group">
+                            <label class="export-label">
+                                <i class="fas fa-calendar-alt"></i> Periode Bulan
+                            </label>
+                            <div class="select-wrapper">
+                                <select name="bulan" class="export-select">
+                                    <option value="">Semua Bulan (Sepanjang Tahun)</option>
+                                    @foreach(range(1, 12) as $m)
+                                        <option value="{{ $m }}">{{ \Carbon\Carbon::create(null, $m, 1)->translatedFormat('F') }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-6 form-group mb-5">
-                                <label class="form-label-custom"><i class="fas fa-calendar-check mr-2"></i>Tahun</label>
-                                <select name="tahun" class="form-control custom-select-box">
-                                    <option value="">Semua</option>
+                        </div>
+
+                        <!-- Filter Tahun -->
+                        <div class="export-form-group">
+                            <label class="export-label">
+                                <i class="fas fa-calendar-check"></i> Periode Tahun
+                            </label>
+                            <div class="select-wrapper">
+                                <select name="tahun" class="export-select">
+                                    <option value="">Semua Tahun Arsip</option>
                                     @foreach($tahun_list as $t)
-                                        <option value="{{ $t }}">{{ $t }}</option>
+                                        <option value="{{ $t }}" {{ $t == date('Y') ? 'selected' : '' }}>{{ $t }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="form-actions mt-2">
-                            <button type="submit" onclick="setExportAction('excel')" class="btn btn-export btn-excel mb-3">
-                                <i class="fas fa-file-excel mr-2"></i> Simpan Excel
-                            </button>
-                            <button type="submit" onclick="setExportAction('pdf')" class="btn btn-export btn-pdf mb-3">
-                                <i class="fas fa-file-pdf mr-2"></i> Simpan PDF
-                            </button>
-                        </div>
+                    <!-- Pilihan Format Unduhan -->
+                    <div class="form-section-title format-section-title">
+                        <i class="fas fa-download"></i> Pilih Format Dokumen Unduhan
+                    </div>
 
-                        <div class="text-center mt-4 border-top pt-4">
-                            <a href="{{ route('admin.laporan.index') }}" class="btn btn-link text-muted btn-sm text-decoration-none">
-                                <i class="fas fa-arrow-left mr-1"></i> Kembali ke Dashboard
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                    <div class="export-action-grid">
+                        <!-- Download PDF Card Button -->
+                        <button type="button" onclick="submitExport('pdf')" class="export-choice-card card-pdf">
+                            <div class="choice-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="choice-info">
+                                <h4>Unduh Dokumen PDF Resmi</h4>
+                                <p>Format siap cetak (Kop Resmi Diskominfosantik A4 Landscape)</p>
+                            </div>
+                            <div class="choice-badge">
+                                <i class="fas fa-arrow-down"></i> Unduh PDF
+                            </div>
+                        </button>
+
+                        <!-- Download Excel Card Button -->
+                        <button type="button" onclick="submitExport('excel')" class="export-choice-card card-excel">
+                            <div class="choice-icon">
+                                <i class="fas fa-file-excel"></i>
+                            </div>
+                            <div class="choice-info">
+                                <h4>Unduh Spreadsheet Excel (.xlsx)</h4>
+                                <p>Format data tabular lengkap untuk rekapitulasi & olah data</p>
+                            </div>
+                            <div class="choice-badge">
+                                <i class="fas fa-arrow-down"></i> Unduh Excel
+                            </div>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+@endsection
 
-@push('styles')
-<style>
-    /* Card Report Style */
-    .report-card {
-        border-radius: 20px;
-        overflow: hidden;
-    }
-
-    /* Circle Icon */
-    .icon-circle {
-        width: 70px;
-        height: 70px;
-        background: rgba(78, 115, 223, 0.1);
-        color: #4e73df;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        font-size: 1.8rem;
-    }
-
-    /* Label & Selectbox */
-    .form-label-custom {
-        font-weight: 700;
-        color: #4e5e7a;
-        font-size: 0.85rem;
-        margin-bottom: 0.6rem;
-        display: block;
-    }
-
-    .custom-select-box {
-        border-radius: 12px !important;
-        border: 1.5px solid #e3e6f0 !important;
-        padding: 0.6rem 1rem !important;
-        height: auto !important;
-        font-size: 0.95rem;
-        color: #6e707e;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .custom-select-box:focus {
-        border-color: #4e73df !important;
-        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.1) !important;
-        color: #333;
-    }
-
-    /* Buttons Style */
-    .form-actions {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .btn-export {
-        padding: 0.8rem;
-        border-radius: 12px;
-        font-weight: 700;
-        border: none;
-        transition: transform 0.2s, box-shadow 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff !important;
-    }
-
-    .btn-export:active {
-        transform: scale(0.98);
-    }
-
-    .btn-excel {
-        background: linear-gradient(135deg, #28a745, #1e7e34);
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
-    }
-
-    .btn-pdf {
-        background: linear-gradient(135deg, #e74a3b, #be2617);
-        box-shadow: 0 4px 12px rgba(231, 74, 59, 0.25);
-    }
-
-    /* Responsivitas Desktop */
-    @media (min-width: 768px) {
-        .form-actions {
-            flex-direction: row;
-            gap: 15px;
-        }
-        .btn-export {
-            flex: 1;
-            margin-bottom: 0 !important;
-        }
-    }
-</style>
-@endpush
-
+@push('scripts')
 <script>
-    function setExportAction(type) {
+    function submitExport(type) {
         const form = document.getElementById('formExport');
-        if (type === 'excel') {
-            form.action = "{{ route('admin.laporan.export.excel') }}";
-        } else {
+        if (type === 'pdf') {
             form.action = "{{ route('admin.laporan.export.pdf') }}";
+        } else if (type === 'excel') {
+            form.action = "{{ route('admin.laporan.export.excel') }}";
         }
+        form.submit();
     }
 </script>
-@endsection
+@endpush

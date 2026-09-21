@@ -15,7 +15,14 @@ return new class extends Migration
             $table->string('email');
             $table->string('no_hp');
             $table->string('universitas');
-            $table->foreignId('divisi_id')->constrained('divisi')->onDelete('cascade');
+            
+            // ===== PERBAIKI: PAKAI UUID JUGA =====
+            $table->uuid('divisi_id');
+            $table->foreign('divisi_id')
+                  ->references('id')
+                  ->on('divisi')
+                  ->onDelete('cascade');
+            
             $table->timestamps();
         });
     }

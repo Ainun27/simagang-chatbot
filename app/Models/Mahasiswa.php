@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\Uuid;
 use App\Traits\EncryptionTrait;
+use Carbon\Carbon;
 
 class Mahasiswa extends Model
 {
-    use Uuid, EncryptionTrait;
+    use HasUuids, EncryptionTrait;
 
     public $incrementing = false;
     protected $keyType = 'string';
@@ -21,20 +22,18 @@ class Mahasiswa extends Model
         'no_hp',
         'universitas', 
         'divisi_id',
-        'tanggal_mulai',      // ← TAMBAH INI
-        'tanggal_selesai',    // ← TAMBAH INI
+        'tanggal_mulai',
+        'tanggal_selesai',
         'is_active'
     ];
 
-    // Kolom yang akan dienkripsi otomatis
-    protected $encryptable = ['nim', 'email', 'no_hp'];
+    // HANYA email dan no_hp yang dienkripsi (NIM TIDAK)
+    protected $encryptable = ['email', 'no_hp'];
 
-    // Default values
     protected $attributes = [
         'is_active' => true
     ];
     
-    // Casting untuk tipe data
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
@@ -46,7 +45,6 @@ class Mahasiswa extends Model
         return $this->belongsTo(Divisi::class);
     }
 
-    // Helper untuk status aktif
     public function getStatusTextAttribute()
     {
         return $this->is_active ? 'Aktif' : 'Nonaktif';
@@ -59,42 +57,30 @@ class Mahasiswa extends Model
             : '<span class="badge badge-danger"><i class="fas fa-times-circle"></i> Nonaktif</span>';
     }
 
-    // Helper untuk cek apakah masa magang sudah berakhir
     public function getIsExpiredAttribute()
     {
-        if (!$this->tanggal_selesai) {
-            return false;
-        }
-        
-        return now()->gt(\Carbon\Carbon::parse($this->tanggal_selesai));
+        if (!$this->tanggal_selesai) return false;
+        return now()->gt(Carbon::parse($this->tanggal_selesai));
     }
 
-    // Helper untuk sisa hari magang
     public function getSisaHariAttribute()
     {
-        if (!$this->tanggal_selesai) {
-            return null;
-        }
+        if (!$this->tanggal_selesai) return null;
         
         $today = now();
-        $selesai = \Carbon\Carbon::parse($this->tanggal_selesai);
+        $selesai = Carbon::parse($this->tanggal_selesai);
         
-        if ($selesai->lt($today)) {
-            return -1; // Sudah lewat
-        }
+        if ($selesai->lt($today)) return -1;
         
         return $today->diffInDays($selesai);
     }
 
-    // Format masa magang
     public function getMasaMagangTextAttribute()
     {
-        if (!$this->tanggal_mulai || !$this->tanggal_selesai) {
-            return '-';
-        }
+        if (!$this->tanggal_mulai || !$this->tanggal_selesai) return '-';
         
-        $mulai = \Carbon\Carbon::parse($this->tanggal_mulai);
-        $selesai = \Carbon\Carbon::parse($this->tanggal_selesai);
+        $mulai = Carbon::parse($this->tanggal_mulai);
+        $selesai = Carbon::parse($this->tanggal_selesai);
         $hari = $mulai->diffInDays($selesai);
         
         return $this->formatMasaMagang($hari);
@@ -126,76 +112,32 @@ class Mahasiswa extends Model
         return "{$hari} hari";
     }
 
-    // Scope untuk filter
-    public function scopeActive($query)
+    public function scopeAktif($query)
     {
-        return $query->where('is_active', true);
+        $today = Carbon::today()->toDateString();
+        return $query->where('is_active', true)
+            ->where(function($q) use ($today) {
+                $q->whereNull('tanggal_selesai')
+                  ->orWhere('tanggal_selesai', '>=', $today);
+            });
     }
 
-    public function scopeInactive($query)
+    public function scopeNonaktif($query)
     {
-        return $query->where('is_active', false);
+        $today = Carbon::today()->toDateString();
+        return $query->where(function($q) use ($today) {
+            $q->where('is_active', false)
+              ->orWhere(function($q2) use ($today) {
+                  $q2->whereNotNull('tanggal_selesai')
+                     ->where('tanggal_selesai', '<', $today);
+              });
+        });
     }
 
-    public function skills()
+    public function scopeSelesai($query)
     {
-        return $this->hasMany(MahasiswaSkill::class);
-    }
-
-    // AI Matching: Hitung compatibility dengan divisi
-    public function getCompatibilityScore($divisi_id)
-    {
-        $divisi = Divisi::with('skillRequirements')->find($divisi_id);
-        
-        if (!$divisi || $divisi->skillRequirements->count() == 0) {
-            return 0;
-        }
-
-        $totalScore = 0;
-        $totalWeight = $divisi->skillRequirements->sum('weight');
-        
-        foreach ($divisi->skillRequirements as $requirement) {
-            $mahasiswaSkill = $this->skills()
-                ->where('skill_name', $requirement->skill_name)
-                ->first();
-            
-            if ($mahasiswaSkill) {
-                // Hitung score berdasarkan level
-                $score = ($mahasiswaSkill->level_score / $requirement->min_level_score) * 100;
-                $score = min($score, 100); // Cap at 100
-                
-                // Apply weight
-                $totalScore += ($score * $requirement->weight);
-            } else {
-                // Tidak punya skill yang required
-                if ($requirement->is_required) {
-                    return 0; // Auto reject jika required skill tidak ada
-                }
-            }
-        }
-        
-        return $totalWeight > 0 ? round($totalScore / $totalWeight) : 0;
-    }
-
-    // AI: Rekomendasi divisi terbaik
-    public function getRecommendedDivisi($limit = 3)
-    {
-        $divisi = Divisi::with('skillRequirements')->get();
-        $recommendations = [];
-        
-        foreach ($divisi as $div) {
-            $score = $this->getCompatibilityScore($div->id);
-            if ($score > 0) {
-                $recommendations[] = [
-                    'divisi' => $div,
-                    'score' => $score
-                ];
-            }
-        }
-        
-        // Sort by score descending
-        usort($recommendations, fn($a, $b) => $b['score'] <=> $a['score']);
-        
-        return array_slice($recommendations, 0, $limit);
+        $today = Carbon::today()->toDateString();
+        return $query->whereNotNull('tanggal_selesai')
+            ->where('tanggal_selesai', '<', $today);
     }
 }

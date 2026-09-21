@@ -22,7 +22,7 @@ return new class extends Migration
         // Tabel skill requirements divisi
         Schema::create('divisi_skill_requirements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('divisi_id')->constrained('divisi')->onDelete('cascade');
+            $table->foreignUuid('divisi_id')->constrained('divisi')->onDelete('cascade');
             $table->string('skill_name');
             $table->enum('min_level', ['beginner', 'intermediate', 'advanced', 'expert']);
             $table->boolean('is_required')->default(false);

@@ -1,0 +1,334 @@
+/* ============================================================ */
+/* EXPORT PAGE CSS - SOLID SLATE LIGHT THEME (SIMAGANG)         */
+/* ============================================================ */
+
+.export-page-wrapper {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem 0 3rem 0;
+}
+
+.top-nav-bar {
+    margin-bottom: 1.5rem;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #334155;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 0.6rem 1.25rem;
+    background: #f1f5f9;
+    border-radius: 10px;
+    border: 1.5px solid #cbd5e1;
+}
+
+.btn-back:hover {
+    color: #0f172a;
+    background: #e2e8f0;
+    transform: translateX(-3px);
+}
+
+/* =============== EXPORT CARD =============== */
+.export-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    border: 1.5px solid #e2e8f0;
+}
+
+/* =============== HEADER =============== */
+.export-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    padding: 2.25rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    color: #ffffff;
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.header-icon-box {
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.header-text-content {
+    flex: 1;
+}
+
+.export-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.4rem 0;
+    color: #ffffff;
+}
+
+.export-description {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.header-meta-badge {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.meta-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meta-count {
+    font-size: 1.15rem;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* =============== BODY =============== */
+.export-body {
+    padding: 2.5rem;
+    background: #ffffff;
+}
+
+.form-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #4338ca;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1.5px solid #e2e8f0;
+}
+
+.form-section-title i {
+    color: #4f46e5;
+}
+
+.format-section-title {
+    margin-top: 2.5rem;
+}
+
+/* =============== FILTER CONTROLS GRID =============== */
+.filter-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.export-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.export-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.export-label i {
+    color: #4f46e5;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.export-select {
+    width: 100%;
+    padding: 0.8rem 1.15rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.925rem;
+    color: #0f172a;
+    background-color: #f8fafc;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.export-select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    background-color: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* =============== FORMAT CHOICE CARDS =============== */
+.export-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.export-choice-card {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    border: 1.5px solid #e2e8f0;
+}
+
+.card-pdf {
+    border-color: #fca5a5;
+    background: #fff1f2;
+}
+
+.card-pdf:hover {
+    border-color: #ef4444;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15);
+    background: #ffffff;
+}
+
+.card-pdf .choice-icon {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.card-pdf .choice-badge {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.card-excel {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.card-excel:hover {
+    border-color: #10b981;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+    background: #ffffff;
+}
+
+.card-excel .choice-icon {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.card-excel .choice-badge {
+    background: #10b981;
+    color: #ffffff;
+}
+
+.choice-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.choice-info {
+    flex: 1;
+    margin-bottom: 1.25rem;
+}
+
+.choice-info h4 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.4rem 0;
+}
+
+.choice-info p {
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+.choice-badge {
+    padding: 0.7rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+}
+
+.export-choice-card:hover .choice-badge {
+    opacity: 0.95;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .export-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.75rem 1.5rem;
+        gap: 1.25rem;
+    }
+
+    .header-meta-badge {
+        align-self: flex-start;
+        text-align: left;
+    }
+
+    .export-body {
+        padding: 1.75rem 1.5rem;
+    }
+
+    .filter-controls-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .export-action-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+}

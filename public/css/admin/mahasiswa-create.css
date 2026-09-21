@@ -1,0 +1,593 @@
+/* ============================================================ */
+/* MAHASISWA CREATE CSS - SOLID SLATE LIGHT THEME (SIMAGANG)    */
+/* ============================================================ */
+
+.form-container {
+    padding: 2rem;
+    background: #ffffff;
+}
+
+/* =============== INFO ENKRIPSI =============== */
+.info-encrypt {
+    background: #eff6ff;
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px;
+    border: 1.5px solid #bfdbfe;
+    border-left: 5px solid #3b82f6;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.info-encrypt-icon {
+    font-size: 2rem;
+    color: #3b82f6;
+    flex-shrink: 0;
+}
+
+.info-encrypt-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #1e3a8a;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.info-encrypt-text small {
+    color: #1d4ed8;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* =============== FORM GROUP =============== */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.45rem;
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.925rem;
+}
+
+.form-label i {
+    color: #4f46e5;
+}
+
+.text-danger {
+    color: #ef4444;
+}
+
+.badge-encrypt {
+    background: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.badge-encrypt i {
+    color: #4f46e5;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.85rem 1.15rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.925rem;
+    transition: all 0.25s ease;
+    background: #f8fafc;
+    color: #0f172a;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    background: #ffffff;
+    color: #0f172a;
+}
+
+.is-invalid {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.invalid-feedback {
+    color: #ef4444;
+    font-size: 0.825rem;
+    display: block;
+    margin-top: 0.35rem;
+    font-weight: 600;
+}
+
+/* =============== FORM ROW =============== */
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* =============== DIVISI INFO =============== */
+#divisi-info {
+    margin-top: 1rem;
+}
+
+.divisi-info-card {
+    background: #f8fafc;
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    border-left: 5px solid #4f46e5;
+}
+
+/* =============== DIVISI INFO CARD WITH SKAT =============== */
+.divisi-info-card {
+    background: #f8fafc;
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px;
+    border: 1.5px solid #cbd5e1;
+    border-left: 5px solid #4f46e5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.divisi-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.divisi-info-title {
+    color: #4338ca;
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.divisi-info-tag {
+    background: #e0e7ff;
+    color: #4338ca;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    border: 1px solid #c7d2fe;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.divisi-info-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+/* Individual Skat / Stat Box */
+.divisi-stat-box {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.85rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    transition: all 0.25s ease;
+}
+
+.divisi-stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+}
+
+.divisi-stat-box.box-total {
+    border-top: 3.5px solid #6366f1;
+}
+
+.divisi-stat-box.box-terisi {
+    border-top: 3.5px solid #0ea5e9;
+}
+
+.divisi-stat-box.box-sisa-avail {
+    border-top: 3.5px solid #10b981;
+}
+
+.divisi-stat-box.box-sisa-full {
+    border-top: 3.5px solid #ef4444;
+}
+
+.stat-box-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.4rem;
+}
+
+.box-total .stat-box-label i { color: #6366f1; }
+.box-terisi .stat-box-label i { color: #0ea5e9; }
+.box-sisa-avail .stat-box-label i { color: #10b981; }
+.box-sisa-full .stat-box-label i { color: #ef4444; }
+
+.stat-box-value {
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.unit-text {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.text-terisi {
+    color: #0284c7;
+}
+
+.text-success { color: #15803d; }
+.text-warning { color: #d97706; }
+.text-danger { color: #dc2626; }
+
+.stat-pill {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+    font-weight: 700;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+/* =============== INFO MASA MAGANG =============== */
+.info-masa-magang {
+    background: #f0fdf4;
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px;
+    border: 1.5px solid #bbf7d0;
+    border-left: 5px solid #10b981;
+    margin-bottom: 2rem;
+}
+
+.info-masa-magang-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    color: #166534;
+    font-weight: 700;
+}
+
+.info-masa-magang-header i {
+    margin-right: 0.5rem;
+    color: #16a34a;
+}
+
+.info-masa-magang-durasi {
+    margin-bottom: 0.5rem;
+    color: #166534;
+    font-weight: 600;
+}
+
+.durasi-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-left: 0.5rem;
+    color: #15803d;
+}
+
+.badge-status {
+    padding: 0.35rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.badge-status.active {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.badge-status.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.badge-status.warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde047;
+}
+
+.info-masa-magang-note {
+    display: block;
+    color: #475569;
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+    font-weight: 500;
+}
+
+/* =============== HELP CARD =============== */
+.help-card {
+    margin-top: 2rem;
+    background: #f8fafc;
+    padding: 1.75rem 2rem;
+    border-radius: 16px;
+    border: 1.5px solid #e2e8f0;
+    border-left: 5px solid #4f46e5;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.help-card h4 {
+    color: #4338ca;
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.help-card h4 i {
+    color: #4f46e5;
+}
+
+.help-card ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.help-card li {
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 1.8rem;
+    color: #334155;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.help-card li i {
+    color: #16a34a;
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+}
+
+.help-card li strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* =============== BUTTONS =============== */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1.5px solid #e2e8f0;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1.5px solid #cbd5e1;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+    color: #ffffff;
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* =============== DASHBOARD CARD =============== */
+.dashboard-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    background: #ffffff;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: #ffffff;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.title-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.main-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: #ffffff;
+}
+
+.subtitle {
+    font-size: 0.85rem;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-add {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    padding: 0.65rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.btn-add:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    .dashboard-header {
+        padding: 1.25rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .divisi-info-stats {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .info-encrypt {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

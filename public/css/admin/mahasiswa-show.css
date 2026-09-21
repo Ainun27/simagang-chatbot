@@ -1,0 +1,528 @@
+/* ============================================================ */
+/* MAHASISWA SHOW CSS - SOLID SLATE LIGHT THEME (SIMAGANG)      */
+/* ============================================================ */
+
+/* =============== MAIN CARD =============== */
+.custom-card {
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.custom-card-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.mahasiswa-title {
+    color: #ffffff;
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.6rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.25s ease;
+    border: none;
+}
+
+.btn-edit {
+    background: #f59e0b;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.btn-edit:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.card-body {
+    padding: 2rem;
+    background: #ffffff;
+}
+
+/* =============== STATUS CONTAINER =============== */
+.status-container {
+    padding: 1.25rem 1.75rem;
+    border-radius: 14px;
+    margin-bottom: 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border: 1.5px solid transparent;
+}
+
+.status-active {
+    background: #dcfce7;
+    border-color: #86efac;
+    border-left: 5px solid #10b981;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    border-left: 5px solid #ef4444;
+}
+
+.status-info {
+    flex: 1;
+}
+
+.status-label {
+    color: #166534;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-inactive .status-label {
+    color: #991b1b;
+}
+
+.status-value {
+    color: #14532d;
+    font-weight: 800;
+    font-size: 1.25rem;
+}
+
+.status-inactive .status-value {
+    color: #7f1d1d;
+}
+
+.periode-info {
+    text-align: right;
+}
+
+.periode-label {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.periode-value {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.hari-sisa {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.hari-lewat {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* =============== UUID CONTAINER =============== */
+.uuid-container {
+    background: #f8fafc;
+    padding: 1.5rem 1.75rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    border-left: 5px solid #4f46e5;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.uuid-label {
+    color: #4338ca;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.uuid-code {
+    background: #ffffff;
+    padding: 0.65rem 1.5rem;
+    border-radius: 10px;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 1.05rem;
+    display: inline-block;
+    color: #4338ca;
+    font-weight: 700;
+    border: 1.5px solid #cbd5e1;
+}
+
+.uuid-description {
+    display: block;
+    margin-top: 0.5rem;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* =============== INFO GRID =============== */
+.info-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.info-card-detail, .divisi-card {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    transition: all 0.25s ease;
+}
+
+.info-card-detail:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+    background: #ffffff;
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.info-header i {
+    color: #4f46e5;
+}
+
+.info-value {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1.15rem;
+    word-break: break-word;
+}
+
+.email-value {
+    font-size: 0.95rem;
+}
+
+.badge-divisi {
+    background: #ede9fe;
+    color: #6d28d9;
+    padding: 0.45rem 1rem;
+    border-radius: 30px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    display: inline-block;
+    border: 1px solid #ddd6fe;
+}
+
+/* =============== DIVISI DETAIL =============== */
+.divisi-detail-container {
+    background: #f8fafc;
+    padding: 1.75rem;
+    border-radius: 16px;
+    border: 1.5px solid #e2e8f0;
+    border-left: 5px solid #4f46e5;
+    margin-bottom: 2rem;
+}
+
+.divisi-title {
+    color: #4338ca;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.divisi-content {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+}
+
+.divisi-header {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.divisi-icon {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+
+.divisi-nama {
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.divisi-deskripsi {
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* =============== STATS GRID =============== */
+.stats-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 1.15rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+}
+
+.stat-label {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.stat-value {
+    color: #0f172a;
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.sisa-positif { color: #16a34a; }
+.sisa-negatif { color: #dc2626; }
+
+.stat-note {
+    color: #64748b;
+    font-size: 0.78rem;
+    margin-top: 0.2rem;
+    font-weight: 600;
+}
+
+.info-note {
+    margin-top: 1rem;
+    color: #475569;
+    font-size: 0.825rem;
+    line-height: 1.5;
+}
+
+.info-note strong {
+    color: #0f172a;
+}
+
+/* =============== DATE GRID =============== */
+.date-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.date-card {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.date-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.date-label {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.date-value {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.date-relative {
+    color: #64748b;
+    font-size: 0.825rem;
+    margin-top: 0.2rem;
+    font-weight: 500;
+}
+
+/* =============== SECURITY INFO =============== */
+.security-info {
+    background: #f8fafc;
+    padding: 1.75rem;
+    border-radius: 16px;
+    border: 1.5px solid #e2e8f0;
+    border-left: 5px solid #4f46e5;
+}
+
+.security-title {
+    color: #4338ca;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.security-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.security-list li {
+    padding: 0.65rem 0;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    line-height: 1.6;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.security-list i {
+    color: #16a34a;
+    font-size: 1rem;
+}
+
+.security-list strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* =============== RESPONSIVE =============== */
+@media (max-width: 1024px) {
+    .info-grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .info-grid-container,
+    .stats-grid-container,
+    .date-grid-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .header-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .divisi-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .divisi-icon {
+        margin: 0 auto;
+    }
+    
+    .status-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .periode-info {
+        text-align: center;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+}

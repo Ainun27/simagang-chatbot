@@ -20,13 +20,13 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended('/admin/dashboard');
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah.',
+            'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
     }
 
@@ -35,6 +35,7 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
         return redirect('/login');
     }
 }

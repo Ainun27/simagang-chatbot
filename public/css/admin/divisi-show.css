@@ -1,0 +1,822 @@
+/* ============================================================ */
+/* DIVISI SHOW CSS - SOLID SLATE LIGHT THEME (SIMAGANG)         */
+/* ============================================================ */
+
+/* =============== MAIN CARD & HEADER =============== */
+.custom-card {
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
+    background: #ffffff;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.custom-card-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.header-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.header-icon {
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.divisi-title {
+    color: #ffffff;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.divisi-id-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(0, 0, 0, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.2rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn {
+    padding: 0.6rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.25s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background: #f59e0b;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.btn-edit:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.card-body {
+    padding: 2rem;
+    background: #ffffff;
+}
+
+/* =============== STATUS CONTAINER =============== */
+.status-container {
+    padding: 1.25rem 1.75rem;
+    border-radius: 14px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    border: 1.5px solid transparent;
+}
+
+.status-available {
+    background: #dcfce7;
+    border-color: #86efac;
+    border-left: 5px solid #10b981;
+}
+
+.status-full {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    border-left: 5px solid #ef4444;
+}
+
+.status-info {
+    flex: 1;
+    min-width: 260px;
+}
+
+.status-label {
+    color: #166534;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    font-size: 0.825rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.status-full .status-label {
+    color: #991b1b;
+}
+
+.status-value {
+    color: #14532d;
+    font-weight: 800;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.status-full .status-value {
+    color: #7f1d1d;
+}
+
+.status-desc {
+    color: #334155;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.status-desc strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.occupancy-badge-container {
+    text-align: right;
+}
+
+.occupancy-label {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.occupancy-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 0.45rem 1rem;
+    border-radius: 50px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.occupancy-pill i {
+    color: #4f46e5;
+}
+
+/* =============== DARK SLATE STATISTICS CARD =============== */
+.statistics-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #ffffff;
+    padding: 1.75rem 2rem;
+    border-radius: 18px;
+    margin-bottom: 2rem;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statistics-header {
+    margin-bottom: 1.5rem;
+}
+
+.statistics-header h3 {
+    margin: 0 0 0.35rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.statistics-subtitle {
+    color: #cbd5e1;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.stat-primary { border-left: 4px solid #6366f1; }
+.stat-info { border-left: 4px solid #0ea5e9; }
+.stat-success { border-left: 4px solid #10b981; }
+.stat-danger { border-left: 4px solid #ef4444; }
+.stat-warning { border-left: 4px solid #f59e0b; }
+
+.stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.stat-primary .stat-icon { background: rgba(99, 102, 241, 0.25); color: #a5b4fc; }
+.stat-info .stat-icon { background: rgba(14, 165, 233, 0.25); color: #7dd3fc; }
+.stat-success .stat-icon { background: rgba(16, 185, 129, 0.25); color: #6ee7b7; }
+.stat-danger .stat-icon { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+.stat-warning .stat-icon { background: rgba(245, 158, 11, 0.25); color: #fde047; }
+
+.stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.stat-sub {
+    display: block;
+    font-size: 0.725rem;
+    color: #94a3b8;
+    margin-top: 0.15rem;
+    font-weight: 500;
+}
+
+/* =============== PROGRESS SECTION (DARK) =============== */
+.progress-section-dark {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.progress-label {
+    color: #cbd5e1;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-label i {
+    color: #818cf8;
+}
+
+.progress-percentage-text {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.progress-track {
+    background: rgba(255, 255, 255, 0.12);
+    height: 14px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #6366f1 100%);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease-in-out;
+}
+
+/* =============== DESCRIPTION BOX =============== */
+.description-box {
+    background: #f8fafc;
+    padding: 1.75rem;
+    border-radius: 16px;
+    border: 1.5px solid #e2e8f0;
+    border-left: 5px solid #4f46e5;
+    margin-bottom: 2rem;
+}
+
+.box-title {
+    color: #4338ca;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.15rem;
+}
+
+.description-text {
+    color: #334155;
+    line-height: 1.75;
+    font-size: 0.95rem;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* =============== INFO GRID CONTAINER =============== */
+.info-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.info-card-detail {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    transition: all 0.25s ease;
+}
+
+.info-card-detail:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+    background: #ffffff;
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.info-header i {
+    color: #4f46e5;
+}
+
+.info-value {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1.15rem;
+    word-break: break-word;
+}
+
+.info-subtext {
+    color: #64748b;
+    font-size: 0.825rem;
+    margin-top: 0.35rem;
+    font-weight: 500;
+}
+
+/* =============== BADGES =============== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.badge-success {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* =============== MAHASISWA SECTION =============== */
+.mahasiswa-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.mahasiswa-header {
+    background: #f8fafc;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.mahasiswa-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.mahasiswa-header-title i {
+    font-size: 1.25rem;
+    color: #4f46e5;
+}
+
+.mahasiswa-header-title h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.count-badge {
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 1px solid #c7d2fe;
+}
+
+/* =============== TABLE STYLING =============== */
+.table-wrapper {
+    overflow-x: auto;
+    padding: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.table th {
+    text-align: left;
+    padding: 0.95rem 1.25rem;
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 2px solid #cbd5e1;
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+    vertical-align: middle;
+    font-size: 0.875rem;
+}
+
+.table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.row-number {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    background: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+    border-radius: 50%;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 26px;
+    text-align: center;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.student-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.student-name {
+    color: #0f172a;
+    font-size: 0.95rem;
+    display: block;
+}
+
+.student-nim {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 0.15rem;
+}
+
+.univ-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #334155;
+    font-weight: 600;
+}
+
+.text-indigo {
+    color: #4f46e5;
+}
+
+.periode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #f1f5f9;
+    padding: 0.3rem 0.65rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: #334155;
+    font-weight: 600;
+    border: 1px solid #cbd5e1;
+}
+
+.periode-badge i {
+    color: #64748b;
+}
+
+.btn-detail-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 0.4rem 0.85rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-decoration: none;
+    border: 1px solid #c7d2fe;
+    transition: all 0.2s ease;
+}
+
+.btn-detail-sm:hover {
+    background: #4338ca;
+    color: #ffffff;
+    border-color: #4338ca;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(67, 56, 202, 0.25);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+/* =============== EMPTY STATE =============== */
+.empty-mahasiswa {
+    background: #f8fafc;
+    padding: 3.5rem 2rem;
+    border-radius: 14px;
+    text-align: center;
+    border: 2px dashed #cbd5e1;
+    margin: 1.5rem 0 0 0;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    background: #e2e8f0;
+    color: #64748b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.25rem auto;
+}
+
+.empty-mahasiswa h4 {
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.empty-mahasiswa p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 1.5rem 0;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.btn-add-student {
+    background: #4f46e5;
+    color: #ffffff;
+    padding: 0.65rem 1.35rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.25s ease;
+}
+
+.btn-add-student:hover {
+    background: #4338ca;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+}
+
+/* =============== RESPONSIVE STYLES =============== */
+@media (max-width: 1024px) {
+    .statistics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .info-grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .custom-card-header {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-actions {
+        width: 100%;
+    }
+    
+    .header-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .status-container {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+    }
+    
+    .occupancy-badge-container {
+        text-align: left;
+        width: 100%;
+    }
+    
+    .statistics-card {
+        padding: 1.25rem;
+    }
+    
+    .statistics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-title-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .divisi-title {
+        font-size: 1.35rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem 0.85rem;
+    }
+    
+    .student-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+}
