@@ -11,851 +11,186 @@ class EvaluasiChatbotController extends Controller
 {
     protected ChatbotService $chatbotService;
 
+    /**
+     * Variasi threshold yang diuji (threshold sweep).
+     * Nilai yang dipakai ditentukan dari hasil pengujian ini, sesuai rumusan penelitian.
+     */
+    protected array $thresholdCandidates = [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80];
+
     public function __construct(ChatbotService $chatbotService)
     {
         $this->chatbotService = $chatbotService;
     }
 
     /**
-     * Dataset Skenario Pengujian Akademik Standar untuk Skripsi (100 Skenario Uji)
+     * Dataset skenario pengujian (120 skenario) yang mewakili variasi pertanyaan pada Bab I:
+     * formal, kata kunci singkat, istilah sehari-hari, singkatan, kesalahan pengetikan,
+     * ditambah skenario negatif (di luar topik) untuk menghitung TN dan FP.
+     *
+     * Format baris: [id, variasi, pertanyaan, kategori KB yang diharapkan, is_topic, deskripsi].
+     * Kategori yang diharapkan memakai nama kategori pada knowledge base secara langsung.
      */
     protected function getTestScenarios(): array
     {
-        return [
-            // =========================================================================
-            // 1. Skenario Kalimat Formal / Baku (20 Kasus) - Expected: Magang / Success
-            // =========================================================================
-            [
-                'id' => 1,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Bagaimana alur dan prosedur pendaftaran magang di Diskominfosantik?',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian pencocokan kalimat baku panjang dengan struktur tata bahasa lengkap'
-            ],
-            [
-                'id' => 2,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apa saja syarat dan dokumen yang harus disiapkan untuk magang?',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian pencocokan multi-keyword (syarat, dokumen, magang)'
-            ],
-            [
-                'id' => 3,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Berapa lama durasi periode pelaksanaan kegiatan magang?',
-                'expected_category' => 'Durasi & Periode',
-                'is_topic' => true,
-                'description' => 'Pengujian pertanyaan waktu dan masa magang'
-            ],
-            [
-                'id' => 4,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah peserta magang mendapatkan sertifikat setelah selesai program?',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian pencocokan benefit dan sertifikat resmi'
-            ],
-            [
-                'id' => 5,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Dimana alamat dan lokasi kantor Diskominfosantik Kabupaten Bekasi?',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian pertanyaan informasi alamat dan lokasi kantor'
-            ],
-            [
-                'id' => 6,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Berapa jam kerja operasional kantor selama kegiatan magang berlangsung?',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian informasi waktu operasional harian kantor'
-            ],
-            [
-                'id' => 7,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apa saja divisi dan unit penempatan yang menerima mahasiswa magang?',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian pertanyaan daftar pilihan divisi magang'
-            ],
-            [
-                'id' => 8,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Berapa sisa kuota penerimaan mahasiswa magang saat ini?',
-                'expected_category' => 'Kuota Penerimaan',
-                'is_topic' => true,
-                'description' => 'Pengujian pertanyaan ketersediaan kuota pendaftaran'
-            ],
-            [
-                'id' => 9,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Bagaimana nomor kontak telepon dan email resmi Diskominfosantik?',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian pertanyaan kontak resmi kantor'
-            ],
-            [
-                'id' => 10,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah ada ketentuan pakaian atau seragam kerja saat kegiatan magang?',
-                'expected_category' => 'Aturan & Tata Tertib',
-                'is_topic' => true,
-                'description' => 'Pengujian tata tertib dan etika berbusana'
-            ],
-            [
-                'id' => 11,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah mahasiswa magang diberikan uang saku atau kompensasi bulanan?',
-                'expected_category' => 'Uang Saku & Benefit',
-                'is_topic' => true,
-                'description' => 'Pengujian informasi kompensasi finansial magang'
-            ],
-            [
-                'id' => 12,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Bagaimana mekanisme pengurusan surat pengantar dari kampus ke kantor?',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian pertanyaan pengurusan surat pengantar kampus'
-            ],
-            [
-                'id' => 13,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah program magang ini terbuka untuk mahasiswa jurusan Teknik Informatika?',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian kecocokan program studi Teknik Informatika'
-            ],
-            [
-                'id' => 14,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah mahasiswa wajib membawa perangkat laptop pribadi selama magang?',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian kewajiban perangkat laptop peserta'
-            ],
-            [
-                'id' => 15,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah sistem magang menerapkan absensi kehadiran harian?',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian aturan presensi dan jam kerja'
-            ],
-            [
-                'id' => 16,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Bagaimana proses konfirmasi penerimaan surat permohonan magang?',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian alur persetujuan surat penerimaan'
-            ],
-            [
-                'id' => 17,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah sertifikat magang yang diterbitkan ditandatangani oleh pejabat resmi?',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian keabsahan sertifikat magang'
-            ],
-            [
-                'id' => 18,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah ada batasan jumlah peserta magang dari satu perguruan tinggi?',
-                'expected_category' => 'Kuota Penerimaan',
-                'is_topic' => true,
-                'description' => 'Pengujian kuota rombongan kampus'
-            ],
-            [
-                'id' => 19,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Apakah peserta magang diperkenankan bekerja secara daring atau WFH?',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian kebijakan kerja daring / WFH'
-            ],
-            [
-                'id' => 20,
-                'category_type' => 'Formal / Baku',
-                'question' => 'Bagaimana tata cara penyusunan penilaian dan lembar laporan akhir magang?',
-                'expected_category' => 'Aturan & Tata Tertib',
-                'is_topic' => true,
-                'description' => 'Pengujian informasi evaluasi akhir kegiatan'
-            ],
+        $rows = [
 
-            // =========================================================================
-            // 2. Skenario Bahasa Gaul / Slang / Kolokial (20 Kasus) - Expected: Magang / Success
-            // =========================================================================
-            [
-                'id' => 21,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Dapet uang saku atau gaji ga min pas pkl disini?',
-                'expected_category' => 'Uang Saku & Benefit',
-                'is_topic' => true,
-                'description' => 'Pengujian sinonim (uang saku -> gaji/honor, pkl -> magang)'
-            ],
-            [
-                'id' => 22,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Cara daftar pkl gimana ya kak?',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian kata informal pkl dan sapaan kak'
-            ],
-            [
-                'id' => 23,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Kantornya dimana posisinya min?',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian sinonim posisi/dimana terhadap lokasi kantor'
-            ],
-            [
-                'id' => 24,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Dapet ijazah sertif ga kalo kelar magang?',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian singkatan sertif dan ijazah'
-            ],
-            [
-                'id' => 25,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Berapa bln masa magang disini ya min?',
-                'expected_category' => 'Durasi & Periode',
-                'is_topic' => true,
-                'description' => 'Pengujian singkatan bln terhadap durasi magang'
-            ],
-            [
-                'id' => 26,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Bisa join divisi IT atau programmer ga kak?',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian kata serapan join dan istilah divisi IT'
-            ],
-            [
-                'id' => 27,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Masuk kantor jam brp dan pulang jam brp min?',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian singkatan jam brp terhadap jam kerja'
-            ],
-            [
-                'id' => 28,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Sisa kuota pkl masih ada ga buat kampus aku?',
-                'expected_category' => 'Kuota Penerimaan',
-                'is_topic' => true,
-                'description' => 'Pengujian bahasa santai seputar kuota pkl'
-            ],
-            [
-                'id' => 29,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Ada nomor wa atau telp admin yg bs dihubungin?',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian singkatan wa/telp terhadap kontak resmi'
-            ],
-            [
-                'id' => 30,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'dpt mkn siang atau snack gratis ga kak?',
-                'expected_category' => 'Uang Saku & Benefit',
-                'is_topic' => true,
-                'description' => 'Pengujian kata dpt mkn terhadap uang saku / fasilitas'
-            ],
-            [
-                'id' => 31,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'kudu bawa berkas apa aja kak?',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian kata santai kudu bawa berkas'
-            ],
-            [
-                'id' => 32,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'baju bebas atau pake seragam rapi kemeja min?',
-                'expected_category' => 'Aturan & Tata Tertib',
-                'is_topic' => true,
-                'description' => 'Pengujian dresscode pakaian kerja'
-            ],
-            [
-                'id' => 33,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'bisa wfh ga min pas magang?',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian istilah wfh terhadap jam kerja'
-            ],
-            [
-                'id' => 34,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'ada fee atau uang transport ga min?',
-                'expected_category' => 'Uang Saku & Benefit',
-                'is_topic' => true,
-                'description' => 'Pengujian kata fee dan uang transport'
-            ],
-            [
-                'id' => 35,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'harus bawa laptop sendiri ga kak?',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian syarat bawa laptop pribadi'
-            ],
-            [
-                'id' => 36,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'prodi sistem informasi bisa daftar divisi apa aja?',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian istilah prodi sistem informasi'
-            ],
-            [
-                'id' => 37,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'gimana alur registrasi online lewat web min?',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian istilah alur registrasi online'
-            ],
-            [
-                'id' => 38,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'Kudu nyiapin ape aje nih bre biar lolos seleksi?',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian dialek/slang ekstrem (kudu, ape aje, bre)'
-            ],
-            [
-                'id' => 39,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'klo mau join project tech lead nya siapa yak?',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian tech slang jargon tanpa kata kunci divisi resmi'
-            ],
-            [
-                'id' => 40,
-                'category_type' => 'Bahasa Gaul / Slang',
-                'question' => 'sertif nya ada ttd kepala dinas ga min?',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian istilah sertif resmi kepala dinas'
-            ],
+            // ===== 1. Formal / Baku (20) =====
+            [1, 'Formal / Baku', 'Bagaimana alur dan prosedur pendaftaran magang di Diskominfosantik?', 'Alur Pengajuan', true, 'Pengujian pencocokan kalimat baku panjang dengan struktur tata bahasa lengkap'],
+            [2, 'Formal / Baku', 'Apa saja syarat dan dokumen yang harus disiapkan untuk magang?', 'Syarat', true, 'Pengujian pencocokan multi-keyword (syarat, dokumen, magang)'],
+            [3, 'Formal / Baku', 'Berapa lama durasi periode pelaksanaan kegiatan magang?', 'Durasi Magang', true, 'Pengujian pertanyaan waktu dan masa magang'],
+            [4, 'Formal / Baku', 'Apakah peserta magang mendapatkan sertifikat setelah selesai program?', 'Sertifikat', true, 'Pengujian pencocokan sertifikat resmi'],
+            [5, 'Formal / Baku', 'Dimana alamat dan lokasi kantor Diskominfosantik Kabupaten Bekasi?', 'Informasi Perusahaan', true, 'Pengujian pertanyaan informasi alamat dan lokasi kantor'],
+            [6, 'Formal / Baku', 'Berapa jam kerja operasional kantor selama kegiatan magang berlangsung?', 'Jam Kerja', true, 'Pengujian informasi waktu operasional harian kantor'],
+            [7, 'Formal / Baku', 'Apa saja divisi dan unit penempatan yang menerima mahasiswa magang?', 'FAQ', true, 'Pengujian pertanyaan daftar pilihan divisi magang'],
+            [8, 'Formal / Baku', 'Berapa sisa kuota penerimaan mahasiswa magang saat ini?', 'Kuota Penerimaan', true, 'Pengujian pertanyaan ketersediaan kuota'],
+            [9, 'Formal / Baku', 'Bagaimana nomor kontak telepon dan email resmi Diskominfosantik?', 'Informasi Perusahaan', true, 'Pengujian pertanyaan kontak resmi kantor'],
+            [10, 'Formal / Baku', 'Apakah ada ketentuan pakaian atau seragam kerja saat kegiatan magang?', 'Aturan & Tata Tertib', true, 'Pengujian tata tertib dan etika berbusana'],
+            [11, 'Formal / Baku', 'Apakah mahasiswa magang diberikan uang saku atau kompensasi bulanan?', 'Biaya', true, 'Pengujian informasi kompensasi finansial magang'],
+            [12, 'Formal / Baku', 'Bagaimana mekanisme pengurusan surat pengantar dari kampus ke kantor?', 'Alur Pengajuan', true, 'Pengujian pertanyaan pengurusan surat pengantar kampus'],
+            [13, 'Formal / Baku', 'Apakah program magang ini terbuka untuk mahasiswa jurusan Teknik Informatika?', 'FAQ', true, 'Pengujian kecocokan program studi Teknik Informatika'],
+            [14, 'Formal / Baku', 'Apakah mahasiswa wajib membawa perangkat laptop pribadi selama magang?', 'Syarat', true, 'Pengujian kewajiban perangkat laptop peserta'],
+            [15, 'Formal / Baku', 'Apakah sistem magang menerapkan absensi kehadiran harian?', 'Absensi', true, 'Pengujian aturan presensi kehadiran'],
+            [16, 'Formal / Baku', 'Bagaimana proses konfirmasi penerimaan surat permohonan magang?', 'Alur Pengajuan', true, 'Pengujian alur persetujuan surat penerimaan'],
+            [17, 'Formal / Baku', 'Apakah sertifikat magang yang diterbitkan ditandatangani oleh pejabat resmi?', 'Sertifikat', true, 'Pengujian keabsahan sertifikat magang (detail tanda tangan belum ada di KB)'],
+            [18, 'Formal / Baku', 'Apakah ada batasan jumlah peserta magang dari satu perguruan tinggi?', 'Kuota Penerimaan', true, 'Pengujian kuota rombongan kampus (detail batas per kampus belum ada di KB)'],
+            [19, 'Formal / Baku', 'Apakah peserta magang diperkenankan bekerja secara daring atau WFH?', 'Aturan & Tata Tertib', true, 'Pengujian kebijakan kerja daring / WFH'],
+            [20, 'Formal / Baku', 'Bagaimana tata cara penyusunan penilaian dan lembar laporan akhir magang?', 'Aturan & Tata Tertib', true, 'Pengujian informasi evaluasi akhir kegiatan'],
 
-            // =========================================================================
-            // 3. Skenario Typo / Kesalahan Ketik (20 Kasus) - Expected: Magang / Success
-            // =========================================================================
-            [
-                'id' => 41,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Syrat pndaftaran mgang apa aja?',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian toleransi typo pada kata syrat, pndaftaran, mgang'
-            ],
-            [
-                'id' => 42,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Brapa lm durasi magang nya?',
-                'expected_category' => 'Durasi & Periode',
-                'is_topic' => true,
-                'description' => 'Pengujian typo pada kata brapa dan lm'
-            ],
-            [
-                'id' => 43,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Almat kntor diskominfo dmana?',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian toleransi typo almat, kntor, dmana'
-            ],
-            [
-                'id' => 44,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Apakh dpat sertipikat magang?',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian variasi fonetik sertipikat'
-            ],
-            [
-                'id' => 45,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Cara daftr pkl onlen gmana?',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian kata typo daftr dan onlen'
-            ],
-            [
-                'id' => 46,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Jm krja opresional kntor',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian typo jm krja dan opresional'
-            ],
-            [
-                'id' => 47,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Kouta pnrmaan mgang msih ad?',
-                'expected_category' => 'Kuota Penerimaan',
-                'is_topic' => true,
-                'description' => 'Pengujian typo kouta dan pnrmaan'
-            ],
-            [
-                'id' => 48,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Emil atau tlp dskmnfo kntor',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian typo emil dan dskmnfo'
-            ],
-            [
-                'id' => 49,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'dapt uang sakku atao gji gaa',
-                'expected_category' => 'Uang Saku & Benefit',
-                'is_topic' => true,
-                'description' => 'Pengujian typo sakku dan gji'
-            ],
-            [
-                'id' => 50,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'pkaian dan sragam krja kemeja',
-                'expected_category' => 'Aturan & Tata Tertib',
-                'is_topic' => true,
-                'description' => 'Pengujian typo pkaian dan sragam'
-            ],
-            [
-                'id' => 51,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'dvisi komputr dan jaringan it',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian typo dvisi dan komputr'
-            ],
-            [
-                'id' => 52,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'brkas srat rkomendasi kmpus',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian typo brkas dan rkomendasi'
-            ],
-            [
-                'id' => 53,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'alr pndaftran stelah dpt srat trima',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian typo alr dan pndaftran'
-            ],
-            [
-                'id' => 54,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'jam plang kntor hri jmat',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian typo plang dan hri'
-            ],
-            [
-                'id' => 55,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'lksi gedung pmkab bekasi',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian typo lksi dan pmkab'
-            ],
-            [
-                'id' => 56,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'srtfikat rsemi diskominfotik',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian typo srtfikat dan rsemi'
-            ],
-            [
-                'id' => 57,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'kuotta untk mhswa smester akhr',
-                'expected_category' => 'Kuota Penerimaan',
-                'is_topic' => true,
-                'description' => 'Pengujian typo kuotta dan mhswa'
-            ],
-            [
-                'id' => 58,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'kpn wktu bka ttp regis gel 2',
-                'expected_category' => 'Durasi & Periode',
-                'is_topic' => true,
-                'description' => 'Pengujian noise singkatan ekstrem waktu pendaftaran'
-            ],
-            [
-                'id' => 59,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'praktek lapang krja dftar dmn ya tgl brp',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian kalimat typo terpotong-potong'
-            ],
-            [
-                'id' => 60,
-                'category_type' => 'Typo / Salah Ketik',
-                'question' => 'Kalo kelar nanti dapet apa aja ya?',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian pertanyaan ambigu tanpa kata kunci topik spesifik'
-            ],
+            // ===== 2. Istilah Sehari-hari (20) =====
+            [21, 'Bahasa Gaul / Slang', 'Dapet uang saku atau gaji ga min pas pkl disini?', 'Biaya', true, 'Pengujian bahasa sehari-hari (dapet, ga, min) dan istilah pkl'],
+            [22, 'Bahasa Gaul / Slang', 'Cara daftar pkl gimana ya kak?', 'Alur Pengajuan', true, 'Pengujian kata informal pkl dan sapaan kak'],
+            [23, 'Bahasa Gaul / Slang', 'Kantornya dimana posisinya min?', 'Informasi Perusahaan', true, 'Pengujian sinonim posisi/dimana terhadap lokasi kantor'],
+            [24, 'Bahasa Gaul / Slang', 'Dapet ijazah sertif ga kalo kelar magang?', 'Sertifikat', true, 'Pengujian istilah sertif dan ijazah (ijazah tidak ada di KB)'],
+            [25, 'Bahasa Gaul / Slang', 'Berapa bln masa magang disini ya min?', 'Durasi Magang', true, 'Pengujian bahasa santai terhadap durasi magang'],
+            [26, 'Bahasa Gaul / Slang', 'Bisa join divisi IT atau programmer ga kak?', 'FAQ', true, 'Pengujian kata serapan join dan istilah divisi IT'],
+            [27, 'Bahasa Gaul / Slang', 'Masuk kantor jam brp dan pulang jam brp min?', 'Jam Kerja', true, 'Pengujian bahasa santai terhadap jam kerja'],
+            [28, 'Bahasa Gaul / Slang', 'Sisa kuota pkl masih ada ga buat kampus aku?', 'Kuota Penerimaan', true, 'Pengujian bahasa santai seputar kuota pkl'],
+            [29, 'Bahasa Gaul / Slang', 'Ada nomor wa atau telp admin yg bs dihubungin?', 'Informasi Perusahaan', true, 'Pengujian istilah santai terhadap kontak resmi'],
+            [30, 'Bahasa Gaul / Slang', 'dpt mkn siang atau snack gratis ga kak?', 'Biaya', true, 'Pengujian bahasa santai terhadap uang makan'],
+            [31, 'Bahasa Gaul / Slang', 'kudu bawa berkas apa aja kak?', 'Syarat', true, 'Pengujian kata santai kudu bawa berkas'],
+            [32, 'Bahasa Gaul / Slang', 'baju bebas atau pake seragam rapi kemeja min?', 'Aturan & Tata Tertib', true, 'Pengujian dresscode pakaian kerja'],
+            [33, 'Bahasa Gaul / Slang', 'bisa wfh ga min pas magang?', 'Aturan & Tata Tertib', true, 'Pengujian istilah wfh'],
+            [34, 'Bahasa Gaul / Slang', 'ada fee atau uang transport ga min?', 'Biaya', true, 'Pengujian kata fee dan uang transport'],
+            [35, 'Bahasa Gaul / Slang', 'harus bawa laptop sendiri ga kak?', 'Syarat', true, 'Pengujian syarat bawa laptop pribadi'],
+            [36, 'Bahasa Gaul / Slang', 'prodi sistem informasi bisa daftar divisi apa aja?', 'FAQ', true, 'Pengujian istilah prodi sistem informasi'],
+            [37, 'Bahasa Gaul / Slang', 'gimana alur registrasi online lewat web min?', 'Alur Pengajuan', true, 'Pengujian istilah alur registrasi online'],
+            [38, 'Bahasa Gaul / Slang', 'Kudu nyiapin ape aje nih bre biar lolos seleksi?', 'Syarat', true, 'Pengujian dialek/slang ekstrem (kudu, ape aje, bre)'],
+            [39, 'Bahasa Gaul / Slang', 'klo mau join project tech lead nya siapa yak?', 'FAQ', true, 'Pengujian jargon teknologi tanpa kata kunci divisi resmi'],
+            [40, 'Bahasa Gaul / Slang', 'sertif nya ada ttd kepala dinas ga min?', 'Sertifikat', true, 'Pengujian istilah sertif resmi kepala dinas (detail tanda tangan belum ada di KB)'],
 
-            // =========================================================================
-            // 4. Skenario Kata Kunci Singkat / Parsial (20 Kasus) - Expected: Magang / Success
-            // =========================================================================
-            [
-                'id' => 61,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'syarat magang',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian input 2 kata kunci inti syarat magang'
-            ],
-            [
-                'id' => 62,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'alur pendaftaran',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian input 2 kata alur pendaftaran'
-            ],
-            [
-                'id' => 63,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'lokasi kantor',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian input 2 kata lokasi kantor'
-            ],
-            [
-                'id' => 64,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'durasi magang',
-                'expected_category' => 'Durasi & Periode',
-                'is_topic' => true,
-                'description' => 'Pengujian input 2 kata durasi magang'
-            ],
-            [
-                'id' => 65,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'uang saku magang',
-                'expected_category' => 'Uang Saku & Benefit',
-                'is_topic' => true,
-                'description' => 'Pengujian input spesifik uang saku'
-            ],
-            [
-                'id' => 66,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'sertifikat magang',
-                'expected_category' => 'Fasilitas & Sertifikat',
-                'is_topic' => true,
-                'description' => 'Pengujian input spesifik sertifikat magang'
-            ],
-            [
-                'id' => 67,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'jam kerja',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian input 2 kata jam kerja'
-            ],
-            [
-                'id' => 68,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'divisi magang',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian input 2 kata divisi magang'
-            ],
-            [
-                'id' => 69,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'kuota magang',
-                'expected_category' => 'Kuota Penerimaan',
-                'is_topic' => true,
-                'description' => 'Pengujian input 2 kata kuota magang'
-            ],
-            [
-                'id' => 70,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'kontak diskominfosantik',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian input kontak kantor'
-            ],
-            [
-                'id' => 71,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'pakaian magang',
-                'expected_category' => 'Aturan & Tata Tertib',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat pakaian magang'
-            ],
-            [
-                'id' => 72,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'dapet makan',
-                'expected_category' => 'Uang Saku & Benefit',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat dapet makan'
-            ],
-            [
-                'id' => 73,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'bawa laptop',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat bawa laptop'
-            ],
-            [
-                'id' => 74,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'divisi IT',
-                'expected_category' => 'Divisi & Penempatan',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat divisi IT'
-            ],
-            [
-                'id' => 75,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'email kantor',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat email kantor'
-            ],
-            [
-                'id' => 76,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'telepon diskominfosantik',
-                'expected_category' => 'Lokasi & Kontak',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat telepon kantor'
-            ],
-            [
-                'id' => 77,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'waktu operasional',
-                'expected_category' => 'Jam Kerja & Operasional',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat waktu operasional'
-            ],
-            [
-                'id' => 78,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'berkas pendaftaran',
-                'expected_category' => 'Persyaratan Magang',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat berkas pendaftaran'
-            ],
-            [
-                'id' => 79,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'prosedur daftar',
-                'expected_category' => 'Alur Pendaftaran',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat prosedur daftar'
-            ],
-            [
-                'id' => 80,
-                'category_type' => 'Kata Kunci Singkat',
-                'question' => 'sisa kuota',
-                'expected_category' => 'Kuota Penerimaan',
-                'is_topic' => true,
-                'description' => 'Pengujian input singkat sisa kuota'
-            ],
+            // ===== 3. Kesalahan Pengetikan / Typo (20) =====
+            [41, 'Typo / Salah Ketik', 'Syrat pndaftaran mgang apa aja?', 'Syarat', true, 'Pengujian toleransi typo pada kata syrat, pndaftaran, mgang'],
+            [42, 'Typo / Salah Ketik', 'Brapa lm durasi magang nya?', 'Durasi Magang', true, 'Pengujian typo pada kata brapa dan lm'],
+            [43, 'Typo / Salah Ketik', 'Almat kntor diskominfo dmana?', 'Informasi Perusahaan', true, 'Pengujian toleransi typo almat, kntor, dmana'],
+            [44, 'Typo / Salah Ketik', 'Apakh dpat sertipikat magang?', 'Sertifikat', true, 'Pengujian variasi fonetik sertipikat'],
+            [45, 'Typo / Salah Ketik', 'Cara daftr pkl onlen gmana?', 'Alur Pengajuan', true, 'Pengujian kata typo daftr dan onlen'],
+            [46, 'Typo / Salah Ketik', 'Jm krja opresional kntor', 'Jam Kerja', true, 'Pengujian typo jm krja dan opresional'],
+            [47, 'Typo / Salah Ketik', 'Kouta pnrmaan mgang msih ad?', 'Kuota Penerimaan', true, 'Pengujian typo kouta dan pnrmaan'],
+            [48, 'Typo / Salah Ketik', 'Emil atau tlp dskmnfo kntor', 'Informasi Perusahaan', true, 'Pengujian typo emil dan dskmnfo'],
+            [49, 'Typo / Salah Ketik', 'dapt uang sakku atao gji gaa', 'Biaya', true, 'Pengujian typo sakku dan gji'],
+            [50, 'Typo / Salah Ketik', 'pkaian dan sragam krja kemeja', 'Aturan & Tata Tertib', true, 'Pengujian typo pkaian dan sragam'],
+            [51, 'Typo / Salah Ketik', 'dvisi komputr dan jaringan it', 'FAQ', true, 'Pengujian typo dvisi dan komputr'],
+            [52, 'Typo / Salah Ketik', 'brkas srat rkomendasi kmpus', 'Syarat', true, 'Pengujian typo brkas dan rkomendasi'],
+            [53, 'Typo / Salah Ketik', 'alr pndaftran stelah dpt srat trima', 'Alur Pengajuan', true, 'Pengujian typo alr dan pndaftran'],
+            [54, 'Typo / Salah Ketik', 'jam plang kntor hri jmat', 'Jam Kerja', true, 'Pengujian typo plang dan hri'],
+            [55, 'Typo / Salah Ketik', 'lksi gedung pmkab bekasi', 'Informasi Perusahaan', true, 'Pengujian typo lksi dan pmkab'],
+            [56, 'Typo / Salah Ketik', 'srtfikat rsemi diskominfotik', 'Sertifikat', true, 'Pengujian typo srtfikat dan rsemi'],
+            [57, 'Typo / Salah Ketik', 'kuotta untk mhswa smester akhr', 'Kuota Penerimaan', true, 'Pengujian typo kuotta dan mhswa'],
+            [58, 'Typo / Salah Ketik', 'kpn wktu bka ttp regis gel 2', 'Durasi Magang', true, 'Pengujian noise singkatan ekstrem waktu pendaftaran (tidak ada di KB)'],
+            [59, 'Typo / Salah Ketik', 'praktek lapang krja dftar dmn ya tgl brp', 'Alur Pengajuan', true, 'Pengujian kalimat typo terpotong-potong'],
+            [60, 'Typo / Salah Ketik', 'Kalo kelar nanti dapet apa aja ya?', 'Benefit', true, 'Pengujian pertanyaan ambigu tanpa kata kunci topik spesifik'],
 
-            // =========================================================================
-            // 5. Skenario Di Luar Topik / Negatif (20 Kasus) - Expected: Fallback Response
-            // =========================================================================
-            [
-                'id' => 81,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Kamu punya pacar ga?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian filter off-topic terkait hal personal'
-            ],
-            [
-                'id' => 82,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Bagaimana alur dan syarat membuat KTP atau KK di kantor Disdukcapil?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan layanan sipil KTP/KK non-magang (False Positive: overlap kata alur dan syarat)'
-            ],
-            [
-                'id' => 83,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Siapa presiden pertama Indonesia?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan pengetahuan umum'
-            ],
-            [
-                'id' => 84,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Mau nonton film bioskop apa yang bagus ya?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian deteksi kata kunci off-topic film/nonton'
-            ],
-            [
-                'id' => 85,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Resep cara memasak nasi goreng enak',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan resep masakan'
-            ],
-            [
-                'id' => 86,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Lagu pop Indonesia apa yang lagi viral sekarang?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan topik musik'
-            ],
-            [
-                'id' => 87,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Main game Mobile Legends mabar yuk min',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan topik gaming'
-            ],
-            [
-                'id' => 88,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Ramalan zodiak cinta Gemini hari ini apa ya?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan topik zodiak / ramalan'
-            ],
-            [
-                'id' => 89,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Toko baju dan distro terdekat di Cikarang dimana ya?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan belanja non-magang'
-            ],
-            [
-                'id' => 90,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'asdfghjkl zxcvbnm qwerty12345',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian input gibberish / acak tanpa arti'
-            ],
-            [
-                'id' => 91,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Harga emas antam per gram hari ini berapa ya?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan harga emas investasi'
-            ],
-            [
-                'id' => 92,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Cuaca hari ini di Jakarta hujan atau panas?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan ramalan cuaca'
-            ],
-            [
-                'id' => 93,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Apa saja syarat dan dokumen izin mendirikan bangunan di pemkab?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian perizinan bangunan non-magang (False Positive: overlap syarat & dokumen)'
-            ],
-            [
-                'id' => 94,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Rekomendasi tempat wisata alam terbaik di Bandung',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan pariwisata'
-            ],
-            [
-                'id' => 95,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Cara memperbaiki motor mogok karena busi basah',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan otomotif / servis kendaraan'
-            ],
-            [
-                'id' => 96,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Siapa pemenang juara dunia MotoGP musim lalu?',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan berita olahraga'
-            ],
-            [
-                'id' => 97,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Chord kunci gitar lagu pop Indonesia terbaru',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian pertanyaan chord musik'
-            ],
-            [
-                'id' => 98,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Jual beli mobil bekas murah berkualitas di Bekasi',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian jual beli otomotif'
-            ],
-            [
-                'id' => 99,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => 'Cara membuat akun Instagram dan TikTok baru',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian media sosial umum'
-            ],
-            [
-                'id' => 100,
-                'category_type' => 'Out-of-Topic / Negatif',
-                'question' => '1234567890 !@#$%^&*()_+=-',
-                'expected_category' => 'Fallback / Di Luar Topik',
-                'is_topic' => false,
-                'description' => 'Pengujian simbol numerik dan karakter acak'
-            ],
+            // ===== 4. Kata Kunci Singkat (20) =====
+            [61, 'Kata Kunci Singkat', 'syarat magang', 'Syarat', true, 'Pengujian input 2 kata kunci inti syarat magang'],
+            [62, 'Kata Kunci Singkat', 'alur pendaftaran', 'Alur Pengajuan', true, 'Pengujian input 2 kata alur pendaftaran'],
+            [63, 'Kata Kunci Singkat', 'lokasi kantor', 'Informasi Perusahaan', true, 'Pengujian input 2 kata lokasi kantor'],
+            [64, 'Kata Kunci Singkat', 'durasi magang', 'Durasi Magang', true, 'Pengujian input 2 kata durasi magang'],
+            [65, 'Kata Kunci Singkat', 'uang saku magang', 'Biaya', true, 'Pengujian input spesifik uang saku'],
+            [66, 'Kata Kunci Singkat', 'sertifikat magang', 'Sertifikat', true, 'Pengujian input spesifik sertifikat magang'],
+            [67, 'Kata Kunci Singkat', 'jam kerja', 'Jam Kerja', true, 'Pengujian input 2 kata jam kerja'],
+            [68, 'Kata Kunci Singkat', 'divisi magang', 'FAQ', true, 'Pengujian input 2 kata divisi magang'],
+            [69, 'Kata Kunci Singkat', 'kuota magang', 'Kuota Penerimaan', true, 'Pengujian input 2 kata kuota magang'],
+            [70, 'Kata Kunci Singkat', 'kontak diskominfosantik', 'Informasi Perusahaan', true, 'Pengujian input kontak kantor'],
+            [71, 'Kata Kunci Singkat', 'pakaian magang', 'Aturan & Tata Tertib', true, 'Pengujian input singkat pakaian magang'],
+            [72, 'Kata Kunci Singkat', 'dapet makan', 'Biaya', true, 'Pengujian input singkat dapet makan'],
+            [73, 'Kata Kunci Singkat', 'bawa laptop', 'Syarat', true, 'Pengujian input singkat bawa laptop'],
+            [74, 'Kata Kunci Singkat', 'divisi IT', 'FAQ', true, 'Pengujian input singkat divisi IT'],
+            [75, 'Kata Kunci Singkat', 'email kantor', 'Informasi Perusahaan', true, 'Pengujian input singkat email kantor'],
+            [76, 'Kata Kunci Singkat', 'telepon diskominfosantik', 'Informasi Perusahaan', true, 'Pengujian input singkat telepon kantor'],
+            [77, 'Kata Kunci Singkat', 'waktu operasional', 'Jam Kerja', true, 'Pengujian input singkat waktu operasional'],
+            [78, 'Kata Kunci Singkat', 'berkas pendaftaran', 'Syarat', true, 'Pengujian input singkat berkas pendaftaran'],
+            [79, 'Kata Kunci Singkat', 'prosedur daftar', 'Alur Pengajuan', true, 'Pengujian input singkat prosedur daftar'],
+            [80, 'Kata Kunci Singkat', 'sisa kuota', 'Kuota Penerimaan', true, 'Pengujian input singkat sisa kuota'],
+
+            // ===== 5. Singkatan (20) =====
+            [81, 'Singkatan', 'Syarat magang di diskominfo apa aja yg hrs dibawa?', 'Syarat', true, 'Pengujian singkatan yg dan hrs pada pertanyaan syarat'],
+            [82, 'Singkatan', 'Brp bln durasi pkl di kominfo?', 'Durasi Magang', true, 'Pengujian singkatan brp, bln, pkl, dan kominfo'],
+            [83, 'Singkatan', 'Jm krja kantor dari jam brp sampai jam brp?', 'Jam Kerja', true, 'Pengujian singkatan jm, krja, dan brp pada jam kerja'],
+            [84, 'Singkatan', 'Bs wfh ga utk mhs pkl?', 'Aturan & Tata Tertib', true, 'Pengujian singkatan bs, utk, mhs, dan pkl pada kebijakan WFH'],
+            [85, 'Singkatan', 'Dpt sertif ga stlh kelar pkl 3 bln?', 'Sertifikat', true, 'Pengujian singkatan dpt, sertif, stlh, dan bln'],
+            [86, 'Singkatan', 'Ada uang saku atau gji utk pkl ga?', 'Biaya', true, 'Pengujian singkatan gji, utk, dan pkl pada uang saku'],
+            [87, 'Singkatan', 'Nmr tlp dan wa admin diskominfo brp ya?', 'Informasi Perusahaan', true, 'Pengujian singkatan nmr, tlp, wa, dan brp pada kontak'],
+            [88, 'Singkatan', 'Almt email diskominfo', 'Informasi Perusahaan', true, 'Pengujian singkatan almt pada informasi instansi'],
+            [89, 'Singkatan', 'Kuota pkl msh ad ga utk mhs univ?', 'Kuota Penerimaan', true, 'Pengujian singkatan msh, ad, mhs, dan univ pada kuota'],
+            [90, 'Singkatan', 'Divisi apa aja yg tersedia utk pkl?', 'FAQ', true, 'Pengujian singkatan yg, utk, dan pkl pada daftar divisi'],
+            [91, 'Singkatan', 'Hrs bawa laptop pribadi ga?', 'Syarat', true, 'Pengujian singkatan hrs pada syarat laptop'],
+            [92, 'Singkatan', 'Dresscode pkl hrs kemeja rapi ga?', 'Aturan & Tata Tertib', true, 'Pengujian istilah dresscode, pkl, dan hrs pada pakaian'],
+            [93, 'Singkatan', 'Alur daftar pkl di diskominfo gmn?', 'Alur Pengajuan', true, 'Pengujian singkatan gmn dan pkl pada alur pengajuan'],
+            [94, 'Singkatan', 'Dpt uang mkn atau transport ga?', 'Biaya', true, 'Pengujian singkatan dpt dan mkn pada uang makan'],
+            [95, 'Singkatan', 'Jam kerja hr jmat sampai jam brp?', 'Jam Kerja', true, 'Pengujian singkatan hr, jmat, dan brp pada jam kerja'],
+            [96, 'Singkatan', 'Lksi kntor diskominfo dmn?', 'Informasi Perusahaan', true, 'Pengujian singkatan lksi, kntor, dan dmn pada lokasi'],
+            [97, 'Singkatan', 'Dokumen persyaratan pkl apa aja yg hrs disiapkan?', 'Syarat', true, 'Pengujian singkatan pkl, yg, dan hrs pada dokumen syarat'],
+            [98, 'Singkatan', 'Sertif dpt kalo pkl brp bln?', 'Sertifikat', true, 'Pengujian singkatan sertif, dpt, brp, dan bln pada syarat sertifikat'],
+            [99, 'Singkatan', 'Kpn konfirmasi acc surat pkl dr dinas?', 'Alur Pengajuan', true, 'Pengujian singkatan kpn, pkl, dan dr pada konfirmasi surat'],
+            [100, 'Singkatan', 'Izin sakit hrs kirim surat dokter ga?', 'Absensi', true, 'Pengujian singkatan hrs pada ketentuan izin sakit'],
+
+            // ===== 6. Negatif / Di Luar Topik (20) - Expected: Fallback =====
+            [101, 'Di Luar Konteks', 'Kamu punya pacar ga?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan personal di luar topik'],
+            [102, 'Di Luar Konteks', 'Bagaimana alur dan syarat membuat KTP atau KK di kantor Disdukcapil?', 'Fallback / Di Luar Topik', false, 'Pengujian layanan sipil non-magang (berpotensi False Positive: overlap kata alur dan syarat)'],
+            [103, 'Di Luar Konteks', 'Siapa presiden pertama Indonesia?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan pengetahuan umum'],
+            [104, 'Di Luar Konteks', 'Mau nonton film bioskop apa yang bagus ya?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan hiburan film'],
+            [105, 'Di Luar Konteks', 'Resep cara memasak nasi goreng enak', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan resep masakan'],
+            [106, 'Di Luar Konteks', 'Lagu pop Indonesia apa yang lagi viral sekarang?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan topik musik'],
+            [107, 'Di Luar Konteks', 'Main game Mobile Legends mabar yuk min', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan topik gaming'],
+            [108, 'Di Luar Konteks', 'Ramalan zodiak cinta Gemini hari ini apa ya?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan topik zodiak'],
+            [109, 'Di Luar Konteks', 'Toko baju dan distro terdekat di Cikarang dimana ya?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan belanja non-magang'],
+            [110, 'Di Luar Konteks', 'asdfghjkl zxcvbnm qwerty12345', 'Fallback / Di Luar Topik', false, 'Pengujian input acak tanpa arti'],
+            [111, 'Di Luar Konteks', 'Harga emas antam per gram hari ini berapa ya?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan harga emas'],
+            [112, 'Di Luar Konteks', 'Cuaca hari ini di Jakarta hujan atau panas?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan cuaca'],
+            [113, 'Di Luar Konteks', 'Apa saja syarat dan dokumen izin mendirikan bangunan di pemkab?', 'Fallback / Di Luar Topik', false, 'Pengujian perizinan non-magang (berpotensi False Positive: overlap syarat dan dokumen)'],
+            [114, 'Di Luar Konteks', 'Rekomendasi tempat wisata alam terbaik di Bandung', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan pariwisata'],
+            [115, 'Di Luar Konteks', 'Cara memperbaiki motor mogok karena busi basah', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan otomotif'],
+            [116, 'Di Luar Konteks', 'Siapa pemenang juara dunia MotoGP musim lalu?', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan olahraga'],
+            [117, 'Di Luar Konteks', 'Chord kunci gitar lagu pop Indonesia terbaru', 'Fallback / Di Luar Topik', false, 'Pengujian pertanyaan chord musik'],
+            [118, 'Di Luar Konteks', 'Jual beli mobil bekas murah berkualitas di Bekasi', 'Fallback / Di Luar Topik', false, 'Pengujian jual beli otomotif'],
+            [119, 'Di Luar Konteks', 'Cara membuat akun Instagram dan TikTok baru', 'Fallback / Di Luar Topik', false, 'Pengujian media sosial umum'],
+            [120, 'Di Luar Konteks', '1234567890 !@#$%^&*()_+=-', 'Fallback / Di Luar Topik', false, 'Pengujian simbol numerik dan karakter acak'],
         ];
+
+        return array_map(fn(array $r) => [
+            'id' => $r[0],
+            'category_type' => $r[1],
+            'question' => $r[2],
+            'expected_category' => $r[3],
+            'is_topic' => $r[4],
+            'description' => $r[5],
+        ], $rows);
     }
 
     /**
-     * Tampilkan Halaman Dashboard Evaluasi Chatbot
+     * Tampilkan halaman dashboard evaluasi chatbot.
      */
     public function index()
     {
         $benchmarkResults = $this->executeBenchmark();
+        $thresholdResults = $this->executeThresholdSweep();
         $totalKb = KnowledgeBase::count();
         $activeKb = KnowledgeBase::where('is_active', true)->count();
-        $categoriesKb = KnowledgeBase::distinct('category')->pluck('category');
+        $categoriesKb = KnowledgeBase::distinct()->pluck('category');
 
         return view('evaluasi.index', compact(
             'benchmarkResults',
+            'thresholdResults',
             'totalKb',
             'activeKb',
             'categoriesKb'
@@ -863,19 +198,29 @@ class EvaluasiChatbotController extends Controller
     }
 
     /**
-     * Jalankan Uji Tolok Ukur (Benchmark) Otomatis
+     * Jalankan uji tolok ukur (benchmark) pada threshold yang sedang aktif.
      */
     public function runBenchmarkAjax()
     {
-        $results = $this->executeBenchmark();
         return response()->json([
             'status' => 'success',
-            'data' => $results
+            'data' => $this->executeBenchmark(),
         ]);
     }
 
     /**
-     * Uji Satu Pertanyaan Live (Single Query Simulator)
+     * Jalankan threshold sweep (variasi nilai threshold) untuk menentukan threshold.
+     */
+    public function runThresholdSweepAjax()
+    {
+        return response()->json([
+            'status' => 'success',
+            'data' => $this->executeThresholdSweep(),
+        ]);
+    }
+
+    /**
+     * Uji satu pertanyaan live (single query simulator).
      */
     public function testSingleQuery(Request $request)
     {
@@ -884,7 +229,7 @@ class EvaluasiChatbotController extends Controller
         if (empty($inputQuery)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Pertanyaan / query tidak boleh kosong.'
+                'message' => 'Pertanyaan / query tidak boleh kosong.',
             ], 422);
         }
 
@@ -892,27 +237,16 @@ class EvaluasiChatbotController extends Controller
         $response = $this->chatbotService->getResponse($inputQuery);
         $executionTimeMs = round((microtime(true) - $startTime) * 1000, 2);
 
-        // Ekstraksi token kata kanonikal dari ChatbotService untuk visualisasi pipeline NLP
-        $canonicalTokens = $this->chatbotService->extractCanonicalTokens($inputQuery);
-        $clean = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', strtolower($inputQuery));
-        $allRawTokens = array_values(array_filter(explode(' ', $clean)));
+        // Hasil setiap tahap preprocessing untuk visualisasi pipeline
+        $steps = $this->chatbotService->preprocessWithSteps($inputQuery);
 
-        // Hitung Top 5 Skor Kemiripan terhadap basis pengetahuan (Knowledge Base)
-        $knowledgeBase = KnowledgeBase::where('is_active', true)->get();
-        $similarityScores = [];
-
-        foreach ($knowledgeBase as $kb) {
-            similar_text(strtolower($inputQuery), strtolower($kb->question), $percent);
-            $similarityScores[] = [
-                'id' => $kb->id,
-                'question' => $kb->question,
-                'category' => $kb->category,
-                'similarity_percent' => round($percent, 1),
-            ];
-        }
-
-        usort($similarityScores, fn($a, $b) => $b['similarity_percent'] <=> $a['similarity_percent']);
-        $topMatches = array_slice($similarityScores, 0, 5);
+        // Top 5 skor kemiripan memakai mesin yang sama dengan chatbot (Sørensen-Dice, character bigram)
+        $topMatches = array_map(fn(array $row) => [
+            'id' => $row['item']->id,
+            'question' => $row['item']->question,
+            'category' => $row['item']->category,
+            'similarity_percent' => round($row['score'] * 100, 2),
+        ], $this->chatbotService->rankKnowledgeBase($steps['result'], 5));
 
         return response()->json([
             'status' => 'success',
@@ -921,27 +255,43 @@ class EvaluasiChatbotController extends Controller
             'bot_category' => $response['category'] ?? 'Fallback / Tidak Dikenali',
             'matched_question' => $response['question_matched'] ?? '-',
             'confidence' => $response['confidence'] ?? 0,
+            'threshold' => $this->chatbotService->getSimilarityThreshold(),
             'latency_ms' => $executionTimeMs,
-            'tokens' => $allRawTokens,
-            'keywords' => $canonicalTokens,
+            'tokens' => $steps['tokens'],
+            'keywords' => $steps['normalized'],
+            'processed_input' => $steps['result'],
+            'preprocessing' => $steps,
             'top_matches' => $topMatches,
-            'bot_answer' => $response['answer'] ?? $response['message'] ?? 'Maaf, saya belum memahami pertanyaan Anda.'
+            'bot_answer' => $response['answer'] ?? 'Maaf, saya belum memahami pertanyaan Anda.',
         ]);
     }
 
     /**
-     * Eksekusi Pengujian 25 Skenario dan Hitung Matriks Evaluasi
+     * Eksekusi seluruh skenario pengujian dan hitung matriks evaluasi.
+     *
+     * Definisi confusion matrix (konsisten untuk seluruh pengujian):
+     * - TP: pertanyaan topik magang, chatbot menjawab, dan kategori jawaban sesuai.
+     * - FN: pertanyaan topik magang, tetapi chatbot memberikan fallback.
+     * - FP: chatbot memberikan jawaban yang tidak seharusnya, yaitu jawaban pada pertanyaan
+     *       di luar topik, atau jawaban dengan kategori yang salah pada pertanyaan topik magang.
+     * - TN: pertanyaan di luar topik dan chatbot memberikan fallback.
+     *
+     * @param bool $withDetails sertakan detail per skenario (dimatikan saat threshold sweep)
      */
-    protected function executeBenchmark(): array
+    protected function executeBenchmark(bool $withDetails = true): array
     {
         $scenarios = $this->getTestScenarios();
         $details = [];
+        $byVariation = [];
         $totalTime = 0;
 
-        $tp = 0; // True Positive: Pertanyaan magang terjawab sesuai
-        $tn = 0; // True Negative: Pertanyaan di luar topik berhasil dialihkan ke fallback
-        $fp = 0; // False Positive: Pertanyaan di luar topik tapi salah dicocokkan
-        $fn = 0; // False Negative: Pertanyaan magang valid tapi gagal dicocokkan (masuk fallback)
+        $tp = 0;
+        $tn = 0;
+        $fp = 0;
+        $fn = 0;
+
+        $loggingWasEnabled = $this->chatbotService->isLoggingEnabled();
+        $this->chatbotService->setLoggingEnabled(false);
 
         foreach ($scenarios as $item) {
             $startTime = microtime(true);
@@ -950,83 +300,157 @@ class EvaluasiChatbotController extends Controller
             $totalTime += $latencyMs;
 
             $isBotSuccess = ($botResponse['status'] === 'success');
-            $classification = '';
-            $isCorrect = false;
+            $botCategory = $botResponse['category'] ?? null;
+
+            $categoryCorrect = $item['is_topic']
+                ? ($isBotSuccess && $botCategory === $item['expected_category'])
+                : !$isBotSuccess;
 
             if ($item['is_topic']) {
-                // Skenario topik magang
-                if ($isBotSuccess) {
+                if ($isBotSuccess && $categoryCorrect) {
                     $tp++;
                     $classification = 'TP';
-                    $isCorrect = true;
+                } elseif ($isBotSuccess) {
+                    $fp++;
+                    $classification = 'FP';
                 } else {
                     $fn++;
                     $classification = 'FN';
-                    $isCorrect = false;
                 }
             } else {
-                // Skenario di luar topik
                 if (!$isBotSuccess) {
                     $tn++;
                     $classification = 'TN';
-                    $isCorrect = true;
                 } else {
                     $fp++;
                     $classification = 'FP';
-                    $isCorrect = false;
                 }
             }
 
-            $details[] = [
-                'id' => $item['id'],
-                'category_type' => $item['category_type'],
-                'question' => $item['question'],
-                'expected_category' => $item['expected_category'],
-                'bot_status' => $botResponse['status'],
-                'bot_category' => $botResponse['category'] ?? 'Fallback Response',
-                'matched_question' => $botResponse['question_matched'] ?? '-',
-                'confidence' => $botResponse['confidence'] ?? 0,
-                'latency_ms' => $latencyMs,
-                'classification' => $classification,
-                'is_correct' => $isCorrect,
-                'description' => $item['description']
-            ];
+            $isCorrect = in_array($classification, ['TP', 'TN'], true);
+
+            $type = $item['category_type'];
+            $byVariation[$type] ??= ['total' => 0, 'correct' => 0, 'tp' => 0, 'tn' => 0, 'fp' => 0, 'fn' => 0];
+            $byVariation[$type]['total']++;
+            $byVariation[$type]['correct'] += $isCorrect ? 1 : 0;
+            $byVariation[$type][strtolower($classification)]++;
+
+            if ($withDetails) {
+                $details[] = [
+                    'id' => $item['id'],
+                    'category_type' => $type,
+                    'question' => $item['question'],
+                    'expected_category' => $item['expected_category'],
+                    'bot_status' => $botResponse['status'],
+                    'bot_category' => $botCategory ?? 'Fallback Response',
+                    'matched_question' => $botResponse['question_matched'] ?? '-',
+                    'confidence' => $botResponse['confidence'] ?? 0,
+                    'latency_ms' => $latencyMs,
+                    'classification' => $classification,
+                    'category_correct' => $categoryCorrect,
+                    'is_correct' => $isCorrect,
+                    'description' => $item['description'],
+                ];
+            }
+        }
+
+        $this->chatbotService->setLoggingEnabled($loggingWasEnabled);
+
+        foreach ($byVariation as $type => $row) {
+            $byVariation[$type]['accuracy'] = $row['total'] > 0
+                ? round(($row['correct'] / $row['total']) * 100, 2)
+                : 0;
         }
 
         $totalTests = count($scenarios);
-        $totalCorrect = $tp + $tn;
-
-        // Formula Akurasi = (TP + TN) / Total
-        $accuracy = $totalTests > 0 ? round(($totalCorrect / $totalTests) * 100, 2) : 0;
-
-        // Formula Presisi = TP / (TP + FP)
-        $precision = ($tp + $fp) > 0 ? round(($tp / ($tp + $fp)) * 100, 2) : 0;
-
-        // Formula Recall = TP / (TP + FN)
-        $recall = ($tp + $fn) > 0 ? round(($tp / ($tp + $fn)) * 100, 2) : 0;
-
-        // Formula F1-Score = 2 * (Precision * Recall) / (Precision + Recall)
-        $f1Score = ($precision + $recall) > 0 ? round((2 * ($precision * $recall) / ($precision + $recall)), 2) : 0;
-
-        // Average Latency
-        $avgLatency = $totalTests > 0 ? round($totalTime / $totalTests, 2) : 0;
+        $metrics = $this->calculateMetrics($tp, $tn, $fp, $fn);
 
         return [
+            'threshold' => $this->chatbotService->getSimilarityThreshold(),
             'total_tests' => $totalTests,
-            'total_correct' => $totalCorrect,
-            'accuracy' => $accuracy,
-            'precision' => $precision,
-            'recall' => $recall,
-            'f1_score' => $f1Score,
-            'avg_latency_ms' => $avgLatency,
+            'total_correct' => $tp + $tn,
+            'accuracy' => $metrics['accuracy'],
+            'precision' => $metrics['precision'],
+            'recall' => $metrics['recall'],
+            'f1_score' => $metrics['f1_score'],
+            'avg_latency_ms' => $totalTests > 0 ? round($totalTime / $totalTests, 2) : 0,
             'confusion_matrix' => [
                 'tp' => $tp,
                 'tn' => $tn,
                 'fp' => $fp,
                 'fn' => $fn,
             ],
+            'by_variation' => $byVariation,
             'details' => $details,
-            'evaluated_at' => Carbon::now()->format('d F Y, H:i:s')
+            'evaluated_at' => Carbon::now()->format('d F Y, H:i:s'),
+        ];
+    }
+
+    /**
+     * Threshold sweep: menjalankan seluruh skenario pada setiap kandidat threshold
+     * dan menentukan threshold terbaik berdasarkan F1-score (seri: accuracy, lalu threshold lebih tinggi).
+     */
+    protected function executeThresholdSweep(): array
+    {
+        $originalThreshold = $this->chatbotService->getSimilarityThreshold();
+        $rows = [];
+
+        try {
+            foreach ($this->thresholdCandidates as $threshold) {
+                $this->chatbotService->setSimilarityThreshold($threshold);
+                $result = $this->executeBenchmark(false);
+
+                $rows[] = [
+                    'threshold' => $threshold,
+                    'accuracy' => $result['accuracy'],
+                    'precision' => $result['precision'],
+                    'recall' => $result['recall'],
+                    'f1_score' => $result['f1_score'],
+                    'confusion_matrix' => $result['confusion_matrix'],
+                ];
+            }
+        } finally {
+            $this->chatbotService->setSimilarityThreshold($originalThreshold);
+        }
+
+        $best = null;
+        foreach ($rows as $row) {
+            if (
+                $best === null
+                || $row['f1_score'] > $best['f1_score']
+                || ($row['f1_score'] === $best['f1_score'] && $row['accuracy'] > $best['accuracy'])
+                || ($row['f1_score'] === $best['f1_score'] && $row['accuracy'] === $best['accuracy'] && $row['threshold'] > $best['threshold'])
+            ) {
+                $best = $row;
+            }
+        }
+
+        return [
+            'results' => $rows,
+            'best_threshold' => $best['threshold'] ?? null,
+            'best_f1_score' => $best['f1_score'] ?? null,
+        ];
+    }
+
+    /**
+     * Menghitung accuracy, precision, recall, dan F1-score (dalam persen).
+     */
+    protected function calculateMetrics(int $tp, int $tn, int $fp, int $fn): array
+    {
+        $total = $tp + $tn + $fp + $fn;
+
+        $accuracy = $total > 0 ? round((($tp + $tn) / $total) * 100, 2) : 0;
+        $precision = ($tp + $fp) > 0 ? round(($tp / ($tp + $fp)) * 100, 2) : 0;
+        $recall = ($tp + $fn) > 0 ? round(($tp / ($tp + $fn)) * 100, 2) : 0;
+        $f1Score = ($precision + $recall) > 0
+            ? round((2 * ($precision * $recall) / ($precision + $recall)), 2)
+            : 0;
+
+        return [
+            'accuracy' => $accuracy,
+            'precision' => $precision,
+            'recall' => $recall,
+            'f1_score' => $f1Score,
         ];
     }
 }

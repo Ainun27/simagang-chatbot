@@ -1,5 +1,5 @@
 # DOKUMEN ANALISIS SISTEM INFORMASI MANAJEMEN MAGANG (SIMAGANG)
-## Terintegrasi Chatbot Knowledge-Based Berbasis String Similarity & Natural Language Processing
+## Terintegrasi Knowledge-Based Chatbot Menggunakan Pipeline Text Preprocessing & Algoritma String Similarity
 ### Studi Kasus: Dinas Komunikasi, Informatika, dan Statistik (Diskominfosantik) Kabupaten Bekasi
 
 ---
@@ -65,7 +65,7 @@ Untuk mengatasi permasalahan tersebut, dikembangkan **Sistem Informasi Manajemen
 
 ### 2.2 Landasan Teori
 
-#### A. Natural Language Processing (NLP)
+#### A. Pipeline Text Preprocessing (Struktur Pemrosesan Teks Berkelanjutan)
 NLP adalah cabang kecerdasan buatan (*Artificial Intelligence*) yang memungkinkan komputer membaca, memahami, dan mengekstraksi makna dari bahasa alami manusia. Pipeline pemrosesan teks meliputi:
 1. **Case Folding:** Mengubah seluruh karakter teks menjadi huruf kecil (*lowercase*).
 2. **Cleansing & Tokenization:** Menghapus tanda baca/karakter khusus dan memotong kalimat menjadi token kata.
@@ -160,7 +160,7 @@ usecaseDiagram
     Admin --> UC9
 ```
 
-#### B. Activity Diagram: Alur Tanya Jawab Chatbot NLP
+#### B. Activity Diagram: Alur Tanya Jawab Chatbot (Pipeline Preprocessing + String Similarity)
 
 ```mermaid
 flowchart TD
@@ -180,7 +180,7 @@ flowchart TD
     ShowUI --> End([Selesai])
 ```
 
-#### C. Sequence Diagram: Interaksi Tanya Jawab Chatbot NLP
+#### C. Sequence Diagram: Interaksi Tanya Jawab Chatbot (Pipeline Preprocessing + String Similarity)
 
 ```mermaid
 sequenceDiagram
@@ -356,7 +356,7 @@ erDiagram
 
 ---
 
-### 3.5 Arsitektur Alur & Implementasi Mesin NLP String Similarity (Dice's Coefficient)
+### 3.5 Arsitektur Alur & Implementasi Pipeline Text Preprocessing dan Algoritma String Similarity (Dice's Coefficient)
 
 Kecerdasan buatan penjawab pertanyaan (*Question Answering Bot*) pada sistem SIMAGANG dirancang secara khusus untuk bekerja secara mandiri (*standalone on-premise*) tanpa ketergantungan pada API pihak ketiga yang berbayar maupun perangkat keras GPU yang mahal. Sistem menggunakan kombinasi pendekatan **Natural Language Processing (NLP) Preprocessing**, **Kamus Kanonikal (Canonical Synonym Mapping)**, dan **Hybrid String Similarity Scoring** berbasis algoritma *Dice's Similarity Coefficient*.
 
@@ -543,7 +543,7 @@ Pengujian fungsionalitas dilakukan pada seluruh modul sistem dengan hasil **100%
 
 ---
 
-### 4.2 Hasil Evaluasi Kinerja Chatbot NLP (Uji Tolok Ukur 100 Kasus)
+### 4.2 Hasil Evaluasi Kinerja Chatbot SIMAGANG (Uji Tolok Ukur 100 Kasus Uji)
 
 Pengujian dilakukan menggunakan **100 Skenario Uji Akademik Independen** yang terbagi rata ke dalam 5 kategori multi-variasi (20 kasus per kategori):
 

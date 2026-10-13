@@ -97,7 +97,7 @@ class EvaluasiChatbotTest extends TestCase
         // 1. Test Sapaan "halo"
         $haloRes = $service->getResponse('halo');
         $this->assertEquals('success', $haloRes['status']);
-        $this->assertEquals('Sapaan & Bantuan', $haloRes['category']);
+        $this->assertEquals('Percakapan Umum', $haloRes['category']);
 
         // 2. Test Sapaan "hai min"
         $haiRes = $service->getResponse('hai min');
@@ -106,11 +106,11 @@ class EvaluasiChatbotTest extends TestCase
         // 3. Test Terima Kasih "terima kasih banyak"
         $thanksRes = $service->getResponse('terima kasih banyak');
         $this->assertEquals('success', $thanksRes['status']);
-        $this->assertEquals('Ucapan Terima Kasih', $thanksRes['category']);
+        $this->assertEquals('Percakapan Umum', $thanksRes['category']);
 
         // 4. Test Identitas Bot "kamu siapa"
         $whoRes = $service->getResponse('kamu siapa');
         $this->assertEquals('success', $whoRes['status']);
-        $this->assertEquals('Profil & Identitas Bot', $whoRes['category']);
+        $this->assertEquals('Percakapan Umum', $whoRes['category']);
     }
 }

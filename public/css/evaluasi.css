@@ -975,10 +975,11 @@ body {
 }
 
 .badge-formal-baku { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
-.badge-bahasa-gaul-slang { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-.badge-typo-salah-ketik { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+.badge-bahasa-gaul-slang, .badge-istilah-sehari-hari { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.badge-typo-salah-ketik, .badge-kesalahan-pengetikan { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
 .badge-kata-kunci-singkat { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-.badge-out-of-topic-negatif { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.badge-singkatan { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+.badge-di-luar-konteks, .badge-negatif-di-luar-topik, .badge-out-of-topic-negatif { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
 
 .test-query-text {
     font-weight: 600;

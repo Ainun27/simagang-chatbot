@@ -597,7 +597,7 @@
                 <button class="suggestion-btn" onclick="sendSuggestion('durasi magang')">
                     <i class="fas fa-calendar-days"></i> Durasi Magang
                 </button>
-                <button class="suggestion-btn" onclick="sendSuggestion('sertifikat')">
+                <button class="suggestion-btn" onclick="sendSuggestion('sertifikat magang')">
                     <i class="fas fa-award"></i> Sertifikat
                 </button>
                 <button class="suggestion-btn" onclick="sendSuggestion('divisi yang tersedia')">

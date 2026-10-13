@@ -179,15 +179,15 @@
                         <div class="step-num">3</div>
                         <div class="step-icon"><i class="fas fa-filter"></i></div>
                         <h4 class="step-title">Stopwords & Sinonim</h4>
-                        <p class="step-desc">Penghapusan kata tidak bermakna dan ekspansi kamus sinonim/bahasa gaul (misal: <em>pkl &rarr; magang</em>).</p>
+                        <p class="step-desc">Penyeragaman istilah kanonikal dan penghapusan kata umum (stopwords) yang tidak membawa bobot informasi.</p>
                     </div>
                     <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
 
                     <div class="pipeline-step">
                         <div class="step-num">4</div>
                         <div class="step-icon"><i class="fas fa-calculator"></i></div>
-                        <h4 class="step-title">Similarity Matching</h4>
-                        <p class="step-desc">Perhitungan nilai kemiripan teks dan bobot irisan kata kunci terhadap Knowledge Base.</p>
+                        <h4 class="step-title">Character Bigram & Dice</h4>
+                        <p class="step-desc">Ekstraksi pasangan 2-karakter unik dan perhitungan Sørensen-Dice: <em>2|A &cap; B| / (|A| + |B|)</em>.</p>
                     </div>
                     <div class="pipeline-arrow"><i class="fas fa-arrow-right"></i></div>
 
@@ -195,7 +195,7 @@
                         <div class="step-num">5</div>
                         <div class="step-icon"><i class="fas fa-check-double"></i></div>
                         <h4 class="step-title">Evaluasi Threshold</h4>
-                        <p class="step-desc">Jika skor &ge; 55 &rarr; Respon Jawaban. Jika skor &lt; 55 &rarr; Respon Fallback Cerdas.</p>
+                        <p class="step-desc">Jika skor kemiripan &ge; 60% &rarr; Berikan Jawaban. Jika skor &lt; 60% &rarr; Alihkan ke Fallback Cerdas.</p>
                     </div>
                 </div>
             </div>
@@ -440,11 +440,9 @@
                 <!-- Filter category tabs -->
                 <div class="table-filter-pills no-print">
                     <button class="filter-pill active" data-filter="all">Semua Skenario ({{ $benchmarkResults['total_tests'] }})</button>
-                    <button class="filter-pill" data-filter="Formal / Baku">Baku / Formal (20)</button>
-                    <button class="filter-pill" data-filter="Bahasa Gaul / Slang">Bahasa Gaul / Slang (20)</button>
-                    <button class="filter-pill" data-filter="Typo / Salah Ketik">Typo / Salah Ketik (20)</button>
-                    <button class="filter-pill" data-filter="Kata Kunci Singkat">Kata Kunci Singkat (20)</button>
-                    <button class="filter-pill" data-filter="Out-of-Topic / Negatif">Di Luar Topik (20)</button>
+                    @foreach($benchmarkResults['by_variation'] as $varName => $varData)
+                    <button class="filter-pill" data-filter="{{ $varName }}">{{ $varName }} ({{ $varData['total'] }})</button>
+                    @endforeach
                 </div>
 
                 <div class="eval-table-wrap">

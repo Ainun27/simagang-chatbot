@@ -2,1412 +2,562 @@
 
 namespace Database\Seeders;
 
+use App\Models\KnowledgeBase;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class KnowledgeBaseSeeder extends Seeder
 {
+    /**
+     * Knowledge Base resmi SIMAGANG Diskominfosantik Kabupaten Bekasi.
+     *
+     * Penyelarasan dengan Bab I proposal:
+     * 1. Seluruh jawaban chatbot bersumber dari knowledge base ini (retrieval-based),
+     *    termasuk sapaan, terima kasih, dan identitas bot (kategori "Percakapan Umum"),
+     *    sehingga keputusan respons sepenuhnya ditentukan oleh Sørensen-Dice Similarity
+     *    dan threshold, bukan oleh aturan di luar knowledge base.
+     * 2. Informasi divisi, kuota, dan sisa kuota ditampilkan melalui dashboard mahasiswa.
+     *    Entri kategori "Kuota Penerimaan" dan "FAQ" hanya mengarahkan pengguna ke dashboard.
+     * 3. Kategori "Alur Pengajuan" hanya menjelaskan prosedur pengajuan magang (surat pengantar
+     *    ke instansi). Pendaftaran magang secara daring berada di luar ruang lingkup penelitian.
+     * 4. Kategori durasi dipisah menjadi "Durasi Magang" dan "Jam Kerja" agar evaluasi
+     *    berbasis kategori tidak mencampur dua topik yang berbeda.
+     */
     public function run(): void
     {
         DB::table('knowledge_base')->truncate();
 
-        $data = [
-            // =========================================================
-            // 1. INFORMASI PERUSAHAAN (12 data)
-            // =========================================================
+        $sapaan = 'Halo! 👋 Selamat datang di Layanan Informasi <strong>SIMAGANG Diskominfosantik Kab. Bekasi</strong>.<br><br>Saya siap membantu Anda memberikan informasi resmi seputar:<br>• 📋 <strong>Persyaratan Pengajuan & Berkas</strong><br>• 🔄 <strong>Alur & Prosedur Pengajuan Magang</strong><br>• ⏱️ <strong>Durasi Magang & Jam Kerja Operasional</strong><br>• 💼 <strong>Divisi yang Tersedia & Kuota (lihat dashboard)</strong><br>• 🍱 <strong>Fasilitas, Kantin & Pakaian</strong><br><br>Silakan ketik pertanyaan Anda secara langsung ya! 😊';
+
+        $terimaKasih = 'Sama-sama! 😊 Senang bisa membantu Anda.<br><br>Jika masih ada hal lain yang ingin ditanyakan seputar program magang di Diskominfosantik Kabupaten Bekasi, silakan ketik langsung ya. Semoga sukses selalu! 🚀';
+
+        $identitasBot = 'Saya adalah <strong>Asisten Virtual SIMAGANG</strong> 🤖 milik Dinas Komunikasi, Informatika, Persandian, dan Statistik (Diskominfosantik) Kabupaten Bekasi.<br><br>Tugas saya adalah memberikan informasi seputar program magang secara otomatis berdasarkan basis pengetahuan (Knowledge Base) dan algoritma Sørensen-Dice Similarity.';
+
+        $apresiasi = 'Terima kasih banyak atas apresiasinya! 😊 Saya terus berusaha memberikan informasi yang cepat dan akurat seputar program magang Diskominfosantik. Ada hal lain yang ingin kamu ketahui?';
+
+        $konfirmasi = 'Siap! 👍 Jika nanti butuh informasi lebih lanjut seputar program magang Diskominfosantik, jangan ragu untuk bertanya kembali ya. Semangat dan sukses selalu! 😊✨';
+
+        $pamitan = 'Sampai jumpa! 👋 Semoga harimu menyenangkan dan proses kegiatan magangmu di Diskominfosantik berjalan lancar!';
+
+        $knowledgeBases = [
+
+            // ================================================================
+            // 1. INFORMASI INSTANSI / PERUSAHAAN
+            // ================================================================
+            [
+                'category' => 'Informasi Perusahaan',
+                'question' => 'alamat kantor diskominfosantik',
+                'answer' => 'Kantor Diskominfosantik Kabupaten Bekasi berlokasi di Gedung Diskominfosantik, Komplek Perkantoran Pemerintah Kabupaten Bekasi, Blok B, Desa Sukamahi, Kecamatan Cikarang Pusat, Kabupaten Bekasi, Jawa Barat 17530.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Informasi Perusahaan',
+                'question' => 'dimana lokasi kantor diskominfosantik bekasi',
+                'answer' => 'Kantor Diskominfosantik Kabupaten Bekasi berlokasi di Gedung Diskominfosantik, Komplek Perkantoran Pemerintah Kabupaten Bekasi, Blok B, Desa Sukamahi, Kecamatan Cikarang Pusat, Kabupaten Bekasi, Jawa Barat 17530.',
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Informasi Perusahaan',
+                'question' => 'kontak telepon wa admin diskominfosantik',
+                'answer' => 'Helpdesk Layanan Magang Diskominfosantik dapat dihubungi melalui Telepon: (021) 89970000, WhatsApp Layanan Informasi: 0812-3456-7890, atau Email resmi: diskominfo@bekasikab.go.id pada hari dan jam kerja operasional.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Informasi Perusahaan',
+                'question' => 'profil dan tugas diskominfosantik bekasi',
+                'answer' => 'Diskominfosantik Kabupaten Bekasi bertugas mengelola urusan pemerintahan daerah di bidang komunikasi, informatika, persandian, dan statistik serta transformasi digital Smart City di Kabupaten Bekasi.',
+                'priority' => 8,
+            ],
+
+            // ================================================================
+            // 2. SYARAT
+            // ================================================================
+            [
+                'category' => 'Syarat',
+                'question' => 'syarat magang',
+                'answer' => "Persyaratan magang di Diskominfosantik:\n1) Mahasiswa atau siswa aktif,\n2) Surat pengantar resmi dari kampus/sekolah,\n3) Membawa perangkat laptop pribadi,\n4) Berkomitmen mengikuti tata tertib instansi.",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Syarat',
+                'question' => 'syarat magang diskominfosantik apa saja',
+                'answer' => "Persyaratan magang di Diskominfosantik:\n1) Mahasiswa atau siswa aktif,\n2) Surat pengantar resmi dari kampus/sekolah,\n3) Membawa perangkat laptop pribadi,\n4) Berkomitmen mengikuti tata tertib instansi.",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Syarat',
+                'question' => 'dokumen persyaratan berkas magang apa',
+                'answer' => "Berkas dokumen persyaratan magang:\n1) Surat pengantar resmi dari kampus/sekolah,\n2) Proposal pengajuan magang (bila ada),\n3) Salinan kartu identitas mahasiswa/siswa (KTM/KTS),\n4) Curriculum Vitae (CV) singkat.",
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Syarat',
+                'question' => 'wajib bawa laptop sendiri atau komputer magang',
+                'answer' => 'Ya, peserta magang diwajibkan membawa perangkat laptop pribadi untuk menunjang pengerjaan tugas dan proyek dinas selama pelaksanaan magang.',
+                'priority' => 8,
+            ],
+            [
+                'category' => 'Syarat',
+                'question' => 'apakah boleh magang tanpa pengalaman kerja',
+                'answer' => 'Boleh. Program magang terbuka bagi mahasiswa dan siswa yang belum memiliki pengalaman kerja sebelumnya asalkan memiliki komitmen untuk belajar.',
+                'priority' => 7,
+            ],
+
+            // ================================================================
+            // 3. ALUR PENGAJUAN (prosedur pengajuan magang, bukan pendaftaran daring)
+            // ================================================================
+            [
+                'category' => 'Alur Pengajuan',
+                'question' => 'alur pendaftaran magang',
+                'answer' => "Alur pengajuan magang:\n1) Cek ketersediaan kuota divisi pada dashboard SIMAGANG,\n2) Ajukan surat pengantar resmi dari kampus/sekolah ke kantor Diskominfosantik,\n3) Proses verifikasi berkas dan persetujuan penempatan,\n4) Pendataan peserta magang pada sistem SIMAGANG.",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Alur Pengajuan',
+                'question' => 'alur dan prosedur pendaftaran magang',
+                'answer' => "Alur pengajuan magang:\n1) Cek ketersediaan kuota divisi pada dashboard SIMAGANG,\n2) Ajukan surat pengantar resmi dari kampus/sekolah ke kantor Diskominfosantik,\n3) Proses verifikasi berkas dan persetujuan penempatan,\n4) Pendataan peserta magang pada sistem SIMAGANG.",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Alur Pengajuan',
+                'question' => 'bagaimana cara daftar mengajukan magang',
+                'answer' => "Tata cara pengajuan magang:\n1) Siapkan surat permohonan/pengantar resmi dari institusi pendidikan,\n2) Serahkan berkas surat ke kantor Diskominfosantik Kabupaten Bekasi,\n3) Tunggu konfirmasi persetujuan dari dinas terkait kuota dan penempatan divisi.",
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Alur Pengajuan',
+                'question' => 'konfirmasi surat persetujuan acc magang',
+                'answer' => 'Konfirmasi persetujuan magang akan diinformasikan oleh pihak instansi atau melalui kontak admin resmi setelah surat pengantar diverifikasi.',
+                'priority' => 8,
+            ],
+            [
+                'category' => 'Alur Pengajuan',
+                'question' => 'alur registrasi pendaftaran online lewat web',
+                'answer' => 'SIMAGANG merupakan platform informasi kuota dan layanan magang di Diskominfosantik. Pengajuan permohonan magang diawali dengan menyerahkan surat pengantar resmi dari kampus/sekolah ke dinas.',
+                'priority' => 7,
+            ],
+
+            // ================================================================
+            // 4. DURASI MAGANG
+            // ================================================================
+            [
+                'category' => 'Durasi Magang',
+                'question' => 'durasi magang',
+                'answer' => 'Durasi kegiatan magang di Diskominfosantik Kabupaten Bekasi umumnya berkisar antara 1 hingga 3 bulan (atau disesuaikan dengan kurikulum kampus/sekolah). Peserta yang melaksanakan magang selama 3 bulan atau lebih akan mendapatkan sertifikat magang resmi.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Durasi Magang',
+                'question' => 'berapa lama durasi magang diskominfosantik bekasi',
+                'answer' => 'Durasi kegiatan magang di Diskominfosantik Kabupaten Bekasi umumnya berkisar antara 1 hingga 3 bulan (atau disesuaikan dengan kurikulum kampus/sekolah). Peserta yang melaksanakan magang selama 3 bulan atau lebih akan mendapatkan sertifikat magang resmi.',
+                'priority' => 10,
+            ],
+
+            // ================================================================
+            // 5. JAM KERJA
+            // ================================================================
+            [
+                'category' => 'Jam Kerja',
+                'question' => 'berapa jam kerja operasional kantor',
+                'answer' => 'Jam kerja operasional di Diskominfosantik Kabupaten Bekasi adalah hari Senin hingga Jumat pukul 07.30 - 16.00 WIB.',
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Jam Kerja',
+                'question' => 'hari kerja dan libur sabtu minggu masuk ga',
+                'answer' => 'Hari kerja magang adalah hari Senin sampai dengan Jumat. Hari Sabtu, Minggu, serta hari libur nasional kantor libur.',
+                'priority' => 8,
+            ],
+
+            // ================================================================
+            // 6. BIAYA
+            // ================================================================
+            [
+                'category' => 'Biaya',
+                'question' => 'apakah magang dapat uang saku atau gaji',
+                'answer' => 'Program magang di Diskominfosantik Kabupaten Bekasi bersifat non-berbayar (unpaid internship), sehingga instansi tidak memberikan uang saku maupun gaji bulanan kepada peserta.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Biaya',
+                'question' => 'ada uang makan atau uang transport tidak',
+                'answer' => 'Instansi tidak menyediakan uang makan harian maupun uang transportasi. Biaya transportasi dan konsumsi harian menjadi tanggung jawab mandiri masing-masing peserta magang.',
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Biaya',
+                'question' => 'dapat uang makan konsumsi snack harian',
+                'answer' => 'Peserta magang tidak mendapatkan tunjangan uang makan maupun konsumsi harian dari instansi.',
+                'priority' => 8,
+            ],
+            [
+                'category' => 'Biaya',
+                'question' => 'biaya pendaftaran magang gratis bayar tidak',
+                'answer' => 'Pendaftaran dan pelaksanaan magang di Diskominfosantik Kabupaten Bekasi sepenuhnya GRATIS (tidak dipungut biaya apapun).',
+                'priority' => 9,
+            ],
+
+            // ================================================================
+            // 7. SERTIFIKAT
+            // ================================================================
+            [
+                'category' => 'Sertifikat',
+                'question' => 'sertifikat magang',
+                'answer' => 'Ya, peserta yang melaksanakan kegiatan magang selama 3 bulan atau lebih akan mendapatkan sertifikat resmi magang setelah menyelesaikan seluruh periode magang.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Sertifikat',
+                'question' => 'apakah dapat sertifikat resmi selesai magang',
+                'answer' => 'Ya, peserta yang melaksanakan kegiatan magang selama 3 bulan atau lebih akan mendapatkan sertifikat resmi magang setelah menyelesaikan seluruh periode magang.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Sertifikat',
+                'question' => 'syarat mendapatkan sertifikat magang 3 bulan',
+                'answer' => "Ketentuan penerbitan sertifikat magang:\n1) Melaksanakan magang selama 3 bulan atau lebih,\n2) Menyelesaikan seluruh periode magang dengan baik,\n3) Menyerahkan draf laporan akhir magang.",
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Sertifikat',
+                'question' => 'kapan sertifikat magang diberikan',
+                'answer' => 'Sertifikat magang diberikan kepada peserta yang telah melaksanakan magang selama 3 bulan atau lebih setelah menyelesaikan seluruh periode magang.',
+                'priority' => 8,
+            ],
+
+            // ================================================================
+            // 8. BENEFIT
+            // ================================================================
+            [
+                'category' => 'Benefit',
+                'question' => 'benefit magang',
+                'answer' => "Manfaat magang di Diskominfosantik:\n1) Pengalaman kerja riil di instansi pemerintah daerah,\n2) Bimbingan langsung dari mentor profesional,\n3) Memperluas relasi dan jaringan kerja,\n4) Memperoleh sertifikat resmi magang (bagi peserta magang 3 bulan atau lebih).",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Benefit',
+                'question' => 'keuntungan dan benefit pengalaman magang',
+                'answer' => "Manfaat magang di Diskominfosantik:\n1) Pengalaman kerja riil di instansi pemerintah daerah,\n2) Bimbingan langsung dari mentor profesional,\n3) Memperluas relasi dan jaringan kerja,\n4) Memperoleh sertifikat resmi magang (bagi peserta magang 3 bulan atau lebih).",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Benefit',
+                'question' => 'apakah peserta magang dapat mentor pembimbing',
+                'answer' => 'Ya, setiap peserta magang akan mendapatkan bimbingan dan arahan langsung dari mentor atau staf ahli pada bidang unit kerja masing-masing.',
+                'priority' => 8,
+            ],
+
+            // ================================================================
+            // 9. FASILITAS
+            // ================================================================
+            [
+                'category' => 'Fasilitas',
+                'question' => 'fasilitas ruang kerja dan wifi kantor magang',
+                'answer' => 'Fasilitas yang disediakan kantor bagi peserta magang meliputi ruang kerja ber-AC, akses internet Wi-Fi kantor, meja kerja bersama, colokan listrik, serta bimbingan mentor.',
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Fasilitas',
+                'question' => 'ada kantin tidak warung makan kantor',
+                'answer' => 'Di dalam gedung kantor tidak tersedia kantin khusus, namun di sekitar komplek perkantoran Pemkab Bekasi terdapat banyak pedagang makanan, warung makan, dan kantin pujasera yang dapat dikunjungi peserta saat jam istirahat.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Fasilitas',
+                'question' => 'makan siang beli dimana warung makan sekitar',
+                'answer' => 'Peserta magang dapat membeli makan siang di warung makan atau pedagang di sekitar area perkantoran Pemkab Bekasi saat jam istirahat (12.00 - 13.00 WIB), atau membawa bekal makanan sendiri dari rumah.',
+                'priority' => 9,
+            ],
+
+            // ================================================================
+            // 10. ABSENSI
+            // ================================================================
+            [
+                'category' => 'Absensi',
+                'question' => 'ketentuan absensi dan jam kehadiran magang',
+                'answer' => 'Kehadiran selama magang mengikuti jadwal dan ketentuan yang ditetapkan oleh instansi. Peserta wajib hadir langsung di kantor pada hari dan jam kerja yang berlaku (Senin - Jumat, 07.30 - 16.00 WIB).',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Absensi',
+                'question' => 'izin sakit berhalangan hadir magang bagaimana',
+                'answer' => 'Jika berhalangan hadir atau sakit, peserta wajib mengabari mentor divisi serta menyerahkan surat keterangan dokter atau surat izin resmi dari pihak kampus/sekolah.',
+                'priority' => 9,
+            ],
+
+            // ================================================================
+            // 11. KUOTA PENERIMAAN (informasi utama tersedia di dashboard)
+            // ================================================================
+            [
+                'category' => 'Kuota Penerimaan',
+                'question' => 'sisa kuota penerimaan magang masih ada',
+                'answer' => 'Informasi kuota penerimaan dan sisa kuota magang pada tiap divisi dapat dilihat langsung pada tampilan dashboard SIMAGANG atau dikonfirmasi kepada admin helpdesk instansi.',
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Kuota Penerimaan',
+                'question' => 'bagaimana jika kuota divisi magang sudah penuh',
+                'answer' => 'Jika kuota pada divisi tujuan sudah penuh, calon peserta dapat memilih opsi divisi lain yang masih tersedia pada dashboard SIMAGANG atau mengajukan permohonan untuk periode bulan berikutnya.',
+                'priority' => 8,
+            ],
+
+            // ================================================================
+            // 12. ATURAN & TATA TERTIB
+            // ================================================================
+            [
+                'category' => 'Aturan & Tata Tertib',
+                'question' => 'ketentuan pakaian seragam rapi kemeja magang',
+                'answer' => "Ketentuan pakaian magang:\n1) Mengenakan kemeja rapi berkerah atau seragam almamater/sekolah,\n2) Celana atau rok bahan kain gelap non-jeans,\n3) Memakai sepatu tertutup formal.",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'Aturan & Tata Tertib',
+                'question' => 'bisa wfh atau harus offline wfo magang',
+                'answer' => 'Kegiatan magang dilaksanakan secara tatap muka langsung (Offline / WFO di kantor Diskominfosantik), kecuali terdapat penugasan dinas lapangan atau arahan khusus dari mentor divisi.',
+                'priority' => 9,
+            ],
+            [
+                'category' => 'Aturan & Tata Tertib',
+                'question' => 'apakah peserta wajib membuat laporan akhir magang',
+                'answer' => 'Peserta wajib menyusun laporan akhir magang dan menyerahkan draf laporan kepada mentor divisi sebagai salah satu syarat penerbitan sertifikat dan lembar penilaian kinerja.',
+                'priority' => 8,
+            ],
+
+            // ================================================================
+            // 13. FAQ (daftar divisi dan jurusan; detail kuota ada di dashboard)
+            // ================================================================
+            [
+                'category' => 'FAQ',
+                'question' => 'divisi yang tersedia',
+                'answer' => "Pilihan divisi dan ketersediaan kuota dapat dilihat langsung pada tampilan dashboard SIMAGANG. Divisi yang tersedia meliputi:\n1) Bidang TIK / Informatika,\n2) Bidang Informasi & Komunikasi Publik (IKP / Humas),\n3) Bidang Persandian & Keamanan Informasi,\n4) Bidang Statistik Daerah.",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'FAQ',
+                'question' => 'divisi magang apa saja yang tersedia',
+                'answer' => "Pilihan divisi dan ketersediaan kuota dapat dilihat langsung pada tampilan dashboard SIMAGANG. Divisi yang tersedia meliputi:\n1) Bidang TIK / Informatika,\n2) Bidang Informasi & Komunikasi Publik (IKP / Humas),\n3) Bidang Persandian & Keamanan Informasi,\n4) Bidang Statistik Daerah.",
+                'priority' => 10,
+            ],
+            [
+                'category' => 'FAQ',
+                'question' => 'jurusan apa saja prodi yang bisa daftar magang',
+                'answer' => "Program magang terbuka untuk berbagai jurusan seperti:\n1) Teknik Informatika, Sistem Informasi, Ilmu Komputer,\n2) Ilmu Komunikasi, Desain Komunikasi Visual (DKV),\n3) Administrasi Perkantoran, Manajemen Informatika,\n4) Statistika dan jurusan serumpun lainnya.",
+                'priority' => 9,
+            ],
+
+            // ================================================================
+            // 14. PERTANYAAN TAMBAHAN DARI VARIASI FAQ LAMA
+            // Hanya menambahkan intent yang belum ter-cover dengan baik.
+            // Jawaban tetap mengikuti Knowledge Base versi 2.
+            // ================================================================
             [
                 'category' => 'Informasi Perusahaan',
                 'question' => 'alamat kantor',
-                'answer' => 'Diskominfosantik Bekasi berlokasi di Komplek Pemkab Bekasi, Cikarang Pusat – 17530, Jawa Barat.',
-                'priority' => 1
+                'answer' => 'Kantor Diskominfosantik Kabupaten Bekasi berlokasi di Gedung Diskominfosantik, Komplek Perkantoran Pemerintah Kabupaten Bekasi, Blok B, Desa Sukamahi, Kecamatan Cikarang Pusat, Kabupaten Bekasi, Jawa Barat 17530.',
+                'priority' => 10,
             ],
             [
                 'category' => 'Informasi Perusahaan',
                 'question' => 'alamat diskominfosantik',
-                'answer' => 'Diskominfosantik Bekasi berlokasi di Komplek Pemkab Bekasi, Cikarang Pusat – 17530, Jawa Barat.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'dimana alamatnya',
-                'answer' => 'Diskominfosantik Bekasi berlokasi di Komplek Pemkab Bekasi, Cikarang Pusat – 17530, Jawa Barat.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'alamatnya dimana sih',
-                'answer' => 'Diskominfosantik Bekasi berlokasi di Komplek Pemkab Bekasi, Cikarang Pusat – 17530, Jawa Barat.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'lokasi diskominfosantik',
-                'answer' => 'Diskominfosantik Bekasi berlokasi di Komplek Pemkab Bekasi, Cikarang Pusat – 17530, Jawa Barat.',
-                'priority' => 1
+                'answer' => 'Kantor Diskominfosantik Kabupaten Bekasi berlokasi di Gedung Diskominfosantik, Komplek Perkantoran Pemerintah Kabupaten Bekasi, Blok B, Desa Sukamahi, Kecamatan Cikarang Pusat, Kabupaten Bekasi, Jawa Barat 17530.',
+                'priority' => 10,
             ],
             [
                 'category' => 'Informasi Perusahaan',
                 'question' => 'email diskominfosantik',
-                'answer' => 'Email resmi: magang@diskominfosantik.bekasikota.go.id',
-                'priority' => 1
+                'answer' => 'Helpdesk Layanan Magang Diskominfosantik dapat dihubungi melalui Telepon: (021) 89970000, WhatsApp Layanan Informasi: 0812-3456-7890, atau Email resmi: diskominfo@bekasikab.go.id pada hari dan jam kerja operasional.',
+                'priority' => 10,
             ],
             [
                 'category' => 'Informasi Perusahaan',
                 'question' => 'nomor telepon diskominfosantik',
-                'answer' => 'Telepon: (021) 8895-1234 ext. 456, aktif Senin-Jumat pukul 08.00-15.30 WIB.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'kontak diskominfosantik',
-                'answer' => 'Email: magang@diskominfosantik.bekasikota.go.id, Telepon: (021) 8895-1234 ext. 456.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'jam operasional',
-                'answer' => 'Senin-Jumat, pukul 08.00 - 15.30 WIB.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'jam kerja',
-                'answer' => 'Senin-Jumat, pukul 08.00 - 15.30 WIB.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'buka jam berapa',
-                'answer' => 'Senin-Jumat, pukul 08.00 - 15.30 WIB.',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'buka jam berapa sih',
-                'answer' => 'Senin-Jumat, pukul 08.00 - 15.30 WIB.',
-                'priority' => 1
-            ],
-
-            // =========================================================
-            // PERTANYAAN "ADA NOMER YANG BISA DIHUBUNGI?"
-            // =========================================================
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'ada nomer yang bisa dihubungi',
-                'answer' => 'Tentu! Anda bisa menghubungi admin kami di nomor (021) 8895-1234 ext. 456. Aktif Senin-Jumat, pukul 08.00-15.30 WIB. Atau email ke magang@diskominfosantik.bekasikota.go.id 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Informasi Perusahaan',
-                'question' => 'nomer yang bisa dihubungi',
-                'answer' => 'Tentu! Admin bisa dihubungi di (021) 8895-1234 ext. 456 atau email magang@diskominfosantik.bekasikota.go.id',
-                'priority' => 1
+                'answer' => 'Helpdesk Layanan Magang Diskominfosantik dapat dihubungi melalui Telepon: (021) 89970000, WhatsApp Layanan Informasi: 0812-3456-7890, atau Email resmi: diskominfo@bekasikab.go.id pada hari dan jam kerja operasional.',
+                'priority' => 10,
             ],
             [
                 'category' => 'Informasi Perusahaan',
                 'question' => 'kontak yang bisa dihubungi',
-                'answer' => 'Anda bisa hubungi admin di (021) 8895-1234 ext. 456 atau email magang@diskominfosantik.bekasikota.go.id. Aktif Senin-Jumat, 08.00-15.30 WIB.',
-                'priority' => 1
+                'answer' => 'Helpdesk Layanan Magang Diskominfosantik dapat dihubungi melalui Telepon: (021) 89970000, WhatsApp Layanan Informasi: 0812-3456-7890, atau Email resmi: diskominfo@bekasikab.go.id pada hari dan jam kerja operasional.',
+                'priority' => 10,
             ],
 
-            // =========================================================
-            // 2. SYARAT & KETENTUAN (11 data)
-            // =========================================================
-            [
-                'category' => 'Syarat',
-                'question' => 'syarat magang',
-                'answer' => 'Syarat magang Diskominfosantik: 1) Mahasiswa aktif D3/D4/S1 dari universitas terakreditasi, 2) Surat pengantar resmi dari fakultas/prodi, 3) Menguasai skill dasar sesuai divisi, 4) Masa magang minimal 1 bulan (Senin-Jumat, 08.00-15.30), 5) Komitmen penuh selama magang, 6) Mematuhi peraturan dan tata tertib instansi, 7) Memiliki laptop/perangkat kerja sendiri, 8) CV dan portofolio (jika ada).',
-                'priority' => 3
-            ],
             [
                 'category' => 'Syarat',
                 'question' => 'persyaratan magang',
-                'answer' => '1) Mahasiswa aktif D3/D4/S1, 2) Surat pengantar resmi dari fakultas, 3) Skill dasar sesuai divisi, 4) Masa magang minimal 1 bulan, 5) Komitmen penuh, 6) Patuhi peraturan, 7) Punya laptop, 8) CV & portofolio.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'Syarat',
-                'question' => 'apa saja syarat magang',
-                'answer' => '1) Mahasiswa aktif D3/D4/S1, 2) Surat pengantar resmi dari fakultas, 3) Skill dasar sesuai divisi, 4) Masa magang minimal 1 bulan, 5) Komitmen penuh, 6) Patuhi peraturan, 7) Punya laptop, 8) CV & portofolio.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'Syarat',
-                'question' => 'syaratnya apa aja',
-                'answer' => '1) Mahasiswa aktif D3/D4/S1, 2) Surat pengantar resmi dari fakultas, 3) Skill dasar sesuai divisi, 4) Masa magang minimal 1 bulan, 5) Komitmen penuh, 6) Patuhi peraturan, 7) Punya laptop, 8) CV & portofolio.',
-                'priority' => 3
-            ],
-
-            [
-                'category' => 'Syarat',
-                'question' => 'syaratnya apa sih',
-                'answer' => '1) Mahasiswa aktif D3/D4/S1, 2) Surat pengantar resmi dari fakultas, 3) Skill dasar sesuai divisi, 4) Masa magang minimal 1 bulan, 5) Komitmen penuh, 6) Patuhi peraturan, 7) Punya laptop, 8) CV & portofolio.',
-                'priority' => 3
+                'answer' => "Persyaratan magang di Diskominfosantik:\n1) Mahasiswa atau siswa aktif,\n2) Surat pengantar resmi dari kampus/sekolah,\n3) Membawa perangkat laptop pribadi,\n4) Berkomitmen mengikuti tata tertib instansi.",
+                'priority' => 10,
             ],
             [
                 'category' => 'Syarat',
                 'question' => 'dokumen yang dibutuhkan',
-                'answer' => 'Dokumen yang dibutuhkan: Surat pengantar resmi dari fakultas/prodi, KTP, KTM, surat pernyataan bermaterai, CV, dan portofolio (jika ada).',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Syarat',
-                'question' => 'berkas yang dibutuhkan',
-                'answer' => 'Berkas: Surat pengantar fakultas, KTP, KTM, surat pernyataan bermaterai, CV, dan portofolio.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Syarat',
-                'question' => 'butuh surat pengantar',
-                'answer' => 'Ya, surat pengantar resmi dari fakultas/prodi diperlukan sebagai salah satu syarat pendaftaran magang.',
-                'priority' => 2
+                'answer' => "Berkas dokumen persyaratan magang:\n1) Surat pengantar resmi dari kampus/sekolah,\n2) Proposal pengajuan magang (bila ada),\n3) Salinan kartu identitas mahasiswa/siswa (KTM/KTS),\n4) Curriculum Vitae (CV) singkat.",
+                'priority' => 9,
             ],
             [
                 'category' => 'Syarat',
                 'question' => 'butuh cv',
-                'answer' => 'Ya, CV dan portofolio (jika ada) diperlukan saat penyerahan berkas ke Diskominfosantik.',
-                'priority' => 2
+                'answer' => 'CV termasuk dalam berkas dokumen persyaratan magang yang perlu disiapkan sebagai CV singkat.',
+                'priority' => 9,
             ],
             [
                 'category' => 'Syarat',
                 'question' => 'harus mahasiswa aktif',
-                'answer' => 'Ya, peserta harus mahasiswa aktif D3/D4/S1 dari universitas terakreditasi.',
-                'priority' => 2
+                'answer' => 'Ya. Peserta magang harus berstatus sebagai mahasiswa atau siswa aktif.',
+                'priority' => 9,
             ],
             [
                 'category' => 'Syarat',
                 'question' => 'harus punya laptop',
-                'answer' => 'Ya, peserta wajib memiliki laptop/perangkat kerja sendiri selama masa magang.',
-                'priority' => 2
+                'answer' => 'Ya, peserta magang diwajibkan membawa perangkat laptop pribadi untuk menunjang pengerjaan tugas dan proyek dinas selama pelaksanaan magang.',
+                'priority' => 9,
             ],
 
-            // =========================================================
-            // 3. ALUR PENDAFTARAN (8 data)
-            // =========================================================
             [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'alur pendaftaran',
-                'answer' => 'Alur pendaftaran magang: 1) Cek kuota & booking slot di website/kantor, 2) Bawa surat rekomendasi kampus ke Diskominfosantik, 3) Dapat surat terima dari Diskominfosantik, 4) Ke Kesbangpol (bawa surat terima, KTP, KTM, surat pernyataan), 5) Tunggu surat keterangan dari Kesbangpol, 6) Kembali ke Diskominfosantik bawa surat & CV, 7) Mulai magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'mau tanya alurnya',
-                'answer' => 'Alur pendaftaran magang: 1) Cek kuota & booking slot di website/kantor, 2) Bawa surat rekomendasi kampus ke Diskominfosantik, 3) Dapat surat terima dari Diskominfosantik, 4) Ke Kesbangpol (bawa surat terima, KTP, KTM, surat pernyataan), 5) Tunggu surat keterangan dari Kesbangpol, 6) Kembali ke Diskominfosantik bawa surat & CV, 7) Mulai magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
+                'category' => 'Alur Pengajuan',
                 'question' => 'alur',
-                'answer' => 'Alur pendaftaran magang: 1) Cek kuota & booking slot di website/kantor, 2) Bawa surat rekomendasi kampus ke Diskominfosantik, 3) Dapat surat terima dari Diskominfosantik, 4) Ke Kesbangpol (bawa surat terima, KTP, KTM, surat pernyataan), 5) Tunggu surat keterangan dari Kesbangpol, 6) Kembali ke Diskominfosantik bawa surat & CV, 7) Mulai magang.',
-                'priority' => 2
+                'answer' => "Alur pengajuan magang:\n1) Cek ketersediaan kuota divisi pada dashboard SIMAGANG,\n2) Ajukan surat pengantar resmi dari kampus/sekolah ke kantor Diskominfosantik,\n3) Proses verifikasi berkas dan persetujuan penempatan,\n4) Pendataan peserta magang pada sistem SIMAGANG.",
+                'priority' => 10,
             ],
             [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'alur magang',
-                'answer' => '1) Cek kuota & booking, 2) Bawa surat rekomendasi, 3) Dapat surat terima, 4) Ke Kesbangpol, 5) Tunggu surat, 6) Kembali ke Diskominfosantik, 7) Mulai magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
+                'category' => 'Alur Pengajuan',
                 'question' => 'cara daftar magang',
-                'answer' => '1) Cek kuota di website/kantor, 2) Booking slot magang, 3) Bawa surat rekomendasi kampus, 4) Urus surat ke Kesbangpol, 5) Serahkan CV ke Diskominfosantik, 6) Mulai magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'proses pendaftaran',
-                'answer' => 'Proses pendaftaran: Booking slot di kantor → penyerahan surat rekomendasi → pengurusan ke Kesbangpol → mulai magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'langkah langkah daftar magang',
-                'answer' => '1) Cek kuota & booking slot, 2) Bawa surat rekomendasi kampus, 3) Dapat surat terima, 4) Ke Kesbangpol, 5) Tunggu surat, 6) Kembali ke Diskominfosantik, 7) Mulai magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'ke kesbangpol',
-                'answer' => 'Ya, setelah mendapat surat terima dari Diskominfosantik, mahasiswa mengajukan ke Kesbangpol dengan membawa surat terima, fotokopi KTP, KTM, dan surat pernyataan bermaterai.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'surat rekomendasi kampus',
-                'answer' => 'Surat rekomendasi magang dari kampus/fakultas/prodi wajib dibawa ke Diskominfosantik setelah booking slot.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Alur Pendaftaran',
-                'question' => 'booking slot magang',
-                'answer' => 'Mahasiswa datang langsung ke Diskominfosantik untuk melakukan booking slot magang setelah cek kuota.',
-                'priority' => 2
+                'answer' => "Tata cara pengajuan magang:\n1) Siapkan surat permohonan/pengantar resmi dari institusi pendidikan,\n2) Serahkan berkas surat ke kantor Diskominfosantik Kabupaten Bekasi,\n3) Tunggu konfirmasi persetujuan dari dinas terkait kuota dan penempatan divisi.",
+                'priority' => 10,
             ],
 
-            // =========================================================
-            // 4. DURASI & WAKTU (4 data)
-            // =========================================================
             [
-                'category' => 'Durasi & Waktu',
-                'question' => 'durasi magang',
-                'answer' => 'Durasi magang fleksibel antara 1-6 bulan sesuai kebutuhan kampus dan kesepakatan dengan divisi. Minimal 1 bulan.',
-                'priority' => 2
+                'category' => 'Jam Kerja',
+                'question' => 'jam operasional',
+                'answer' => 'Jam kerja operasional di Diskominfosantik Kabupaten Bekasi adalah hari Senin hingga Jumat pukul 07.30 - 16.00 WIB.',
+                'priority' => 10,
             ],
             [
-                'category' => 'Durasi & Waktu',
-                'question' => 'berapa lama magang',
-                'answer' => 'Minimal 1 bulan, maksimal 6 bulan. Fleksibel sesuai kebutuhan kampus.',
-                'priority' => 2
+                'category' => 'Jam Kerja',
+                'question' => 'jam kerja',
+                'answer' => 'Jam kerja operasional di Diskominfosantik Kabupaten Bekasi adalah hari Senin hingga Jumat pukul 07.30 - 16.00 WIB.',
+                'priority' => 10,
             ],
             [
-                'category' => 'Durasi & Waktu',
-                'question' => 'lama magang',
-                'answer' => 'Magang berlangsung minimal 1 bulan dan maksimal 6 bulan.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Durasi & Waktu',
-                'question' => 'magang berapa bulan',
-                'answer' => 'Fleksibel 1-6 bulan sesuai kebutuhan kampus dan divisi.',
-                'priority' => 2
+                'category' => 'Jam Kerja',
+                'question' => 'buka jam berapa',
+                'answer' => 'Jam kerja operasional di Diskominfosantik Kabupaten Bekasi adalah hari Senin hingga Jumat pukul 07.30 - 16.00 WIB.',
+                'priority' => 9,
             ],
 
-            // =========================================================
-            // 5. BIAYA / KOMPENSASI (23 data)
-            // =========================================================
             [
                 'category' => 'Biaya',
                 'question' => 'uang saku',
-                'answer' => 'Program magang ini tidak memberikan uang saku, gaji, uang makan, honorarium, atau kompensasi finansial lainnya.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet uang saku',
-                'answer' => 'Tidak. Program magang ini tidak memberikan uang saku, gaji, uang makan, honorarium, atau kompensasi finansial lainnya.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet uang saku ga',
-                'answer' => 'Tidak ada uang saku, gaji, uang makan, atau kompensasi finansial lainnya.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet uang saku nggak',
-                'answer' => 'Tidak. Program magang ini murni tanpa kompensasi finansial.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'ada uang saku ga',
-                'answer' => 'Tidak ada uang saku atau kompensasi finansial lainnya.',
-                'priority' => 2
+                'answer' => 'Program magang di Diskominfosantik Kabupaten Bekasi bersifat non-berbayar (unpaid internship), sehingga instansi tidak memberikan uang saku maupun gaji bulanan kepada peserta.',
+                'priority' => 10,
             ],
             [
                 'category' => 'Biaya',
                 'question' => 'gaji',
-                'answer' => 'Program magang ini tidak memberikan gaji atau kompensasi finansial.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet gaji',
-                'answer' => 'Tidak. Magang di Diskominfosantik tidak memberikan gaji.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet gaji ga',
-                'answer' => 'Tidak ada gaji. Program ini murni magang tanpa kompensasi finansial.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet gaji nggak',
-                'answer' => 'Tidak ada gaji. Magang ini adalah program pengembangan SDM tanpa bayaran.',
-                'priority' => 2
+                'answer' => 'Program magang di Diskominfosantik Kabupaten Bekasi bersifat non-berbayar (unpaid internship), sehingga instansi tidak memberikan uang saku maupun gaji bulanan kepada peserta.',
+                'priority' => 10,
             ],
             [
                 'category' => 'Biaya',
                 'question' => 'dapet makan',
-                'answer' => 'Program magang ini tidak menyediakan uang makan atau fasilitas makan gratis dari kantor. Namun di sekitar komplek Pemkab Bekasi banyak terdapat warung makan/kantin, atau peserta dapat membawa bekal dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet uang makan',
-                'answer' => 'Tidak ada uang makan atau kompensasi finansial. Namun peserta magang dapat membeli makanan sendiri di warung sekitar komplek Pemkab Bekasi atau membawa bekal makanan dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet makan ga',
-                'answer' => 'Tidak ada uang makan atau fasilitas makan gratis dari kantor. Untuk makan siang, peserta magang dapat membeli makanan di warung/kantin sekitar kawasan Pemkab Bekasi, pesan online, atau membawa bekal dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'dapet makan nggak',
-                'answer' => 'Tidak ada fasilitas makan gratis dari kantor. Peserta magang biasanya membeli makan siang di warung/kantin sekitar komplek Pemkab Bekasi, pesan makanan via online, atau membawa bekal sendiri.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'disana dapet makan',
-                'answer' => 'Tidak ada fasilitas makan gratis dari instansi. Peserta magang dipersilakan membeli makan di warung/kantin sekitar area Pemkab atau membawa bekal sendiri.',
-                'priority' => 2
+                'answer' => 'Peserta magang tidak mendapatkan tunjangan uang makan maupun konsumsi harian dari instansi.',
+                'priority' => 9,
             ],
             [
                 'category' => 'Biaya',
                 'question' => 'uang makan',
-                'answer' => 'Program magang ini tidak memberikan uang makan atau uang saku. Peserta dapat membeli makanan secara mandiri di warung/kantin sekitar Pemkab Bekasi atau membawa bekal dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'biaya pendaftaran',
-                'answer' => 'Program magang Diskominfosantik GRATIS! Tidak ada biaya pendaftaran sama sekali.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'ada biaya pendaftaran',
-                'answer' => 'Tidak ada biaya pendaftaran. Program magang ini GRATIS!',
-                'priority' => 2
+                'answer' => 'Peserta magang tidak mendapatkan tunjangan uang makan maupun konsumsi harian dari instansi.',
+                'priority' => 9,
             ],
             [
                 'category' => 'Biaya',
                 'question' => 'gratis magang',
-                'answer' => 'Ya, program magang ini GRATIS! Tidak ada biaya pendaftaran.',
-                'priority' => 2
+                'answer' => 'Pendaftaran dan pelaksanaan magang di Diskominfosantik Kabupaten Bekasi sepenuhnya GRATIS (tidak dipungut biaya apapun).',
+                'priority' => 9,
             ],
             [
                 'category' => 'Biaya',
                 'question' => 'bayar magang',
-                'answer' => 'Tidak ada biaya pendaftaran. Program magang ini GRATIS!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'magang gratis ga',
-                'answer' => 'Ya, program magang ini GRATIS! Tidak ada biaya pendaftaran sama sekali.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'kenapa ga ada gaji',
-                'answer' => 'Program magang ini merupakan program pengembangan SDM dari Diskominfosantik yang fokus pada pemberian pengalaman, sertifikat, dan networking. Tidak ada kompensasi finansial karena ini adalah program magang non-profit.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'kenapa ga dapet uang saku',
-                'answer' => 'Program magang ini adalah program pengembangan SDM yang fokus pada pengalaman, sertifikat, dan networking. Tidak ada kompensasi finansial karena ini adalah program magang non-profit dari pemerintah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Biaya',
-                'question' => 'kok ga ada gaji',
-                'answer' => 'Program ini adalah program magang non-profit dari Diskominfosantik yang fokus pada pengembangan skill dan pengalaman peserta, bukan pada kompensasi finansial.',
-                'priority' => 2
+                'answer' => 'Pendaftaran dan pelaksanaan magang di Diskominfosantik Kabupaten Bekasi sepenuhnya GRATIS (tidak dipungut biaya apapun).',
+                'priority' => 9,
             ],
 
-            // =========================================================
-            // 6. SERTIFIKAT (4 data)
-            // =========================================================
-            [
-                'category' => 'Sertifikat',
-                'question' => 'sertifikat magang',
-                'answer' => 'Ya! Peserta yang menyelesaikan program magang dengan baik akan mendapat sertifikat resmi dari Diskominfosantik Bekasi.',
-                'priority' => 2
-            ],
             [
                 'category' => 'Sertifikat',
                 'question' => 'dapet sertifikat',
-                'answer' => 'Ya! Peserta yang menyelesaikan magang akan mendapat sertifikat resmi.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Sertifikat',
-                'question' => 'dapet sertifikat ga',
-                'answer' => 'Ya, sertifikat resmi diberikan setelah menyelesaikan program magang dengan baik.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Sertifikat',
-                'question' => 'ada sertifikat',
-                'answer' => 'Ya, sertifikat resmi diberikan setelah menyelesaikan program magang dengan baik.',
-                'priority' => 2
+                'answer' => 'Ya, peserta yang melaksanakan kegiatan magang selama 3 bulan atau lebih akan mendapatkan sertifikat resmi magang setelah menyelesaikan seluruh periode magang.',
+                'priority' => 10,
             ],
 
-            // =========================================================
-            // 7. BENEFIT (3 data)
-            // =========================================================
-            [
-                'category' => 'Benefit',
-                'question' => 'benefit magang',
-                'answer' => 'Dapatkan: 1) Sertifikat resmi, 2) Networking dengan profesional IT dan pemerintahan, 3) Mentor berpengalaman, 4) Pengalaman proyek nyata yang berdampak langsung pada masyarakat!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Benefit',
-                'question' => 'keuntungan magang',
-                'answer' => 'Keuntungan magang: Sertifikat resmi, pengalaman kerja langsung di proyek Smart City, bimbingan profesional, jaringan di sektor pemerintahan, peluang karir, fasilitas kerja lengkap.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Benefit',
-                'question' => 'dapat apa dari magang',
-                'answer' => 'Sertifikat resmi, networking dengan profesional, mentor berpengalaman, pengalaman proyek nyata!',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 8. FASILITAS (Kantin, Laptop, dll.)
-            // =========================================================
-            [
-                'category' => 'Fasilitas',
-                'question' => 'laptop',
-                'answer' => 'Peserta wajib memiliki laptop/perangkat kerja sendiri selama masa magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'bawa laptop',
-                'answer' => 'Ya, peserta wajib membawa laptop/perangkat kerja sendiri.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'fasilitas magang',
-                'answer' => 'Fasilitas: bimbingan mentor, sertifikat, pengalaman proyek nyata, dan networking. Peserta wajib membawa laptop sendiri.',
-                'priority' => 2
-            ],
             [
                 'category' => 'Fasilitas',
                 'question' => 'kantin',
-                'answer' => 'Di kantor Diskominfosantik tidak tersedia kantin khusus. Namun, peserta magang dipersilakan untuk keluar membeli makan siang di warung/kantin sekitar kawasan Pemkab Bekasi, memesan makanan via ojek online, atau membawa bekal makanan sendiri dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'ada kantin',
-                'answer' => 'Di Diskominfosantik tidak ada kantin internal. Peserta magang biasanya keluar mencari makan siang di sekitar area perkantoran Pemkab Bekasi, pesan online, atau membawa bekal sendiri.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'ada kantin ga',
-                'answer' => 'Tidak ada kantin khusus di dalam kantor. Peserta magang bisa keluar mencari makan siang di warung sekitar komplek Pemkab Bekasi, pesan makanan online, atau membawa bekal dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'ada kantin nggak',
-                'answer' => 'Tidak ada kantin khusus di dalam kantor. Peserta magang bisa keluar mencari makan siang di warung sekitar komplek Pemkab Bekasi, pesan makanan online, atau membawa bekal dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'tempat makan siang',
-                'answer' => 'Untuk makan siang, peserta magang dapat keluar di sekitar area perkantoran Pemkab Bekasi (banyak warung makan/kantin sekitar), memesan makanan secara online, atau membawa bekal sendiri.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'makan siang beli dimana',
-                'answer' => 'Makan siang bisa dibeli di warung/kantin di sekitar komplek perkantoran Pemkab Bekasi, pesan lewat aplikasi online, atau membawa bekal sendiri.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'bisa keluar cari makan ga',
-                'answer' => 'Ya, pada saat jam istirahat makan siang peserta magang dipersilakan keluar kantor untuk membeli makanan di sekitar komplek Pemkab atau makan bekal sendiri.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'boleh bawa bekal makan',
-                'answer' => 'Tentu boleh! Peserta magang sangat diperbolehkan membawa bekal makanan dan minuman sendiri dari rumah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'ada tukang makan deket sana',
-                'answer' => 'Ya, di sekitar kawasan komplek perkantoran Pemkab Bekasi terdapat banyak warung makan, kantin pemkab, dan pedagang makanan. Peserta magang dapat keluar saat jam istirahat untuk membeli makanan, memesan via ojek online, atau membawa bekal dari rumah.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'tukang makan deket sana',
-                'answer' => 'Ya, di sekitar komplek Pemkab Bekasi banyak terdapat warung makan dan pedagang makanan. Peserta magang bisa keluar mencari makan saat jam istirahat atau pesan via online.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'ada tukang makan',
-                'answer' => 'Di sekitar area perkantoran Pemkab Bekasi banyak tersedia warung makan dan penjual makanan. Peserta magang bisa membeli makan siang di sekitar kantor saat jam istirahat.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'ada warung makan dekat kantor',
-                'answer' => 'Ya, di sekitar komplek Pemkab Bekasi terdapat banyak warung makan, kantin, dan tempat makan. Peserta magang bisa membeli makan siang saat jam istirahat.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'tempat makan dekat kantor',
-                'answer' => 'Di sekitar kawasan perkantoran Pemkab Bekasi banyak terdapat warung makan dan kantin. Peserta magang dipersilakan keluar membeli makanan saat jam istirahat.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'Fasilitas',
-                'question' => 'ada yang jualan makanan dekat sana',
-                'answer' => 'Ya, banyak penjual makanan dan warung makan di sekitar komplek perkantoran Pemkab Bekasi yang bisa dikunjungi saat jam istirahat siang.',
-                'priority' => 3
+                'answer' => 'Di dalam gedung kantor tidak tersedia kantin khusus, namun di sekitar komplek perkantoran Pemkab Bekasi terdapat banyak pedagang makanan, warung makan, dan kantin pujasera yang dapat dikunjungi peserta saat jam istirahat.',
+                'priority' => 10,
             ],
 
-            // =========================================================
-            // 9. ABSENSI (3 data)
-            // =========================================================
             [
                 'category' => 'Absensi',
                 'question' => 'absensi',
-                'answer' => 'Absensi dilakukan secara offline. Wajib hadir sesuai jadwal (Senin-Jumat, 08:00-15:30 WIB) dengan toleransi keterlambatan maksimal 15 menit.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Absensi',
-                'question' => 'bagaimana absensi',
-                'answer' => 'Absensi dilakukan secara offline. Wajib hadir sesuai jadwal dengan toleransi keterlambatan maksimal 15 menit.',
-                'priority' => 2
+                'answer' => 'Kehadiran selama magang mengikuti jadwal dan ketentuan yang ditetapkan oleh instansi. Peserta wajib hadir langsung di kantor pada hari dan jam kerja yang berlaku (Senin - Jumat, 07.30 - 16.00 WIB).',
+                'priority' => 10,
             ],
             [
                 'category' => 'Absensi',
                 'question' => 'telat',
-                'answer' => 'Toleransi keterlambatan maksimal 15 menit. Setelah itu dianggap terlambat.',
-                'priority' => 2
+                'answer' => 'Peserta wajib hadir sesuai jadwal kerja yang berlaku, yaitu Senin - Jumat pukul 07.30 - 16.00 WIB. Jika berhalangan hadir atau mengalami keterlambatan, peserta sebaiknya mengabari mentor divisi.',
+                'priority' => 9,
             ],
 
-            // =========================================================
-            // 10. LIBUR & TANGGAL MERAH (9 data)
-            // =========================================================
             [
                 'category' => 'FAQ',
                 'question' => 'libur',
-                'answer' => 'Kami libur pada hari Sabtu dan Minggu, serta mengikuti hari libur nasional/tanggal merah yang ditetapkan pemerintah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'apakah ada hari libur',
-                'answer' => 'Kami libur pada hari Sabtu dan Minggu, serta mengikuti hari libur nasional/tanggal merah yang ditetapkan pemerintah.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'hari libur',
-                'answer' => 'Hari libur kami adalah Sabtu dan Minggu, serta tanggal merah / hari libur nasional.',
-                'priority' => 2
+                'answer' => 'Hari Sabtu, Minggu, serta hari libur nasional kantor libur.',
+                'priority' => 10,
             ],
             [
                 'category' => 'FAQ',
                 'question' => 'tanggal merah',
-                'answer' => 'Kami mengikuti hari libur nasional / tanggal merah yang ditetapkan pemerintah. Tidak ada aktivitas magang di hari libur nasional.',
-                'priority' => 2
+                'answer' => 'Hari libur nasional atau tanggal merah merupakan hari libur kantor. Kegiatan magang mengikuti ketentuan hari kerja instansi.',
+                'priority' => 10,
             ],
             [
                 'category' => 'FAQ',
-                'question' => 'libur nasional',
-                'answer' => 'Kami mengikuti hari libur nasional / tanggal merah yang ditetapkan pemerintah. Magang diliburkan pada hari libur nasional.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'hari minggu kerja ga',
-                'answer' => 'Tidak. Kami libur pada hari Minggu. Aktivitas magang hanya Senin-Jumat, pukul 08.00-15.30 WIB.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'sabtu minggu kerja ga',
-                'answer' => 'Tidak. Kami libur pada hari Sabtu dan Minggu. Aktivitas magang hanya Senin-Jumat, pukul 08.00-15.30 WIB.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'hari sabtu kerja',
-                'answer' => 'Tidak. Hari Sabtu dan Minggu adalah hari libur. Magang hanya dilaksanakan Senin-Jumat.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kalau tanggal merah gimana',
-                'answer' => 'Kami mengikuti hari libur nasional / tanggal merah yang ditetapkan pemerintah. Tidak ada aktivitas magang di hari libur nasional.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'tanggal merah masuk ga',
-                'answer' => 'Tidak. Kami libur pada tanggal merah / hari libur nasional sesuai ketetapan pemerintah.',
-                'priority' => 2
+                'question' => 'apakah bisa pindah divisi',
+                'answer' => 'Jika kuota pada divisi tujuan sudah penuh, calon peserta dapat memilih opsi divisi lain yang masih tersedia pada dashboard SIMAGANG atau mengajukan permohonan untuk periode bulan berikutnya.',
+                'priority' => 8,
             ],
 
-            // =========================================================
-            // 11. FAQ DARI HALAMAN INFORMASI (7 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'Berapa lama durasi magang?',
-                'answer' => 'Durasi magang fleksibel antara 1-6 bulan sesuai kebutuhan kampus dan kesepakatan dengan divisi. Minimal 1 bulan (7,5 jam kerja efektif).',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'Apakah ada biaya pendaftaran?',
-                'answer' => 'Tidak ada biaya pendaftaran sama sekali. Program magang ini gratis untuk seluruh peserta sebagai bagian dari komitmen Diskominfosantik dalam pengembangan SDM.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'Apakah mendapat sertifikat?',
-                'answer' => 'Ya, peserta yang menyelesaikan program magang dengan baik akan mendapat sertifikat resmi dari Diskominfosantik Bekasi yang dapat digunakan untuk melengkapi persyaratan akademik dan profesional.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'Bagaimana sistem absensi?',
-                'answer' => 'Absensi dilakukan secara offline. Peserta wajib hadir sesuai jadwal yang ditentukan (Senin-Jumat, 08:00-15:30 WIB) dengan toleransi keterlambatan maksimal 15 menit.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'Apakah bisa pindah divisi?',
-                'answer' => 'Perpindahan divisi hanya diperbolehkan dalam kondisi khusus (seperti ketidakcocokan skill atau kebutuhan proyek) dan harus melalui persetujuan admin serta kepala divisi terkait dengan alasan yang jelas.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'Kapan pendaftaran dibuka?',
-                'answer' => 'Pendaftaran dibuka sepanjang tahun dengan sistem rolling admission, namun kuota terbatas per divisi. Kami sarankan untuk mendaftar segera ketika kuota masih tersedia untuk divisi yang Anda minati.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'Apakah mendapatkan Uang Saku?',
-                'answer' => 'Program magang ini tidak disertai pemberian gaji, uang saku, uang makan, honorarium, maupun bentuk fasilitas atau kompensasi finansial lainnya.',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 12. VARIASI CASUAL (15 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'kenapa gratis',
-                'answer' => 'Program magang ini gratis sebagai bentuk komitmen Diskominfosantik dalam pengembangan SDM dan memberikan kesempatan kepada mahasiswa untuk belajar tanpa beban biaya.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kenapa ga bayar',
-                'answer' => 'Program magang ini adalah program non-profit dari pemerintah yang bertujuan mengembangkan talenta digital.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kenapa harus magang disini',
-                'answer' => 'Karena Diskominfosantik adalah leading sector transformasi digital Smart City Bekasi. Kamu akan mendapat pengalaman kerja nyata di proyek pemerintah, bimbingan mentor profesional, dan sertifikat resmi!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kenapa harus bawa laptop',
-                'answer' => 'Karena peserta magang akan mengerjakan proyek digital menggunakan perangkat sendiri. Ini juga melatih kemandirian dan tanggung jawab peserta.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kok gratis',
-                'answer' => 'Program magang ini gratis sebagai bentuk komitmen Diskominfosantik dalam pengembangan SDM dan memberikan kesempatan kepada mahasiswa untuk belajar tanpa beban biaya.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kok ga ada gaji',
-                'answer' => 'Program ini adalah program magang non-profit dari Diskominfosantik yang fokus pada pengembangan skill dan pengalaman peserta, bukan pada kompensasi finansial.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kok harus pindah ke kesbangpol',
-                'answer' => 'Karena Kesbangpol adalah instansi yang mengeluarkan surat keterangan resmi untuk magang di lingkup pemerintah daerah. Ini adalah prosedur administrasi yang wajib.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'syaratnya apa sih',
-                'answer' => 'Syarat magang: 1) Mahasiswa aktif D3/D4/S1, 2) Surat pengantar resmi dari fakultas, 3) Skill dasar sesuai divisi, 4) Masa magang minimal 1 bulan, 5) Komitmen penuh, 6) Patuhi peraturan, 7) Punya laptop, 8) CV & portofolio.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'alamatnya dimana sih',
-                'answer' => 'Diskominfosantik Bekasi berlokasi di Komplek Pemkab Bekasi, Cikarang Pusat – 17530, Jawa Barat.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'caranya gimana sih daftar',
-                'answer' => '1) Cek kuota di website/kantor, 2) Booking slot magang, 3) Bawa surat rekomendasi kampus, 4) Urus surat ke Kesbangpol, 5) Serahkan CV ke Diskominfosantik, 6) Mulai magang.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'dapet sertifikat dong',
-                'answer' => 'Ya! Peserta yang menyelesaikan magang akan mendapat sertifikat resmi dari Diskominfosantik Bekasi.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'gratis kan dong',
-                'answer' => 'Ya, program magang ini GRATIS! Tidak ada biaya pendaftaran sama sekali.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ga ada biaya kan',
-                'answer' => 'Ya, program magang ini GRATIS! Tidak ada biaya pendaftaran sama sekali.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'nggak bayar kan',
-                'answer' => 'Ya, program magang ini GRATIS! Tidak ada biaya pendaftaran sama sekali.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'nggak dapet uang saku kan',
-                'answer' => 'Ya benar, program magang ini tidak memberikan uang saku atau kompensasi finansial lainnya.',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 13. PERTANYAAN DI LUAR KRITERIA (6 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'boleh tanya apa aja',
-                'answer' => 'Maaf, saya hanya bisa menjawab pertanyaan seputar program magang Diskominfosantik. Untuk pertanyaan lain, silakan hubungi admin kami di (021) 8895-1234 ext. 456 atau datang langsung ke kantor Diskominfosantik Bekasi. Terima kasih! 😊',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'info lain',
-                'answer' => 'Maaf, saya hanya bisa menjawab seputar program magang. Untuk informasi di luar magang, silakan hubungi admin di (021) 8895-1234 ext. 456 atau datang langsung ke Diskominfosantik Bekasi. 😊',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'bisa tanya apa',
-                'answer' => 'Saya bisa menjawab pertanyaan seputar: 1) Syarat magang, 2) Alur pendaftaran, 3) Durasi magang, 4) Sertifikat, 5) Benefit, 6) Jam kerja, 7) Alamat kantor, 8) Kontak Diskominfosantik. Untuk pertanyaan lain, silakan hubungi admin ya! 😊',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'di luar magang',
-                'answer' => 'Maaf, saya hanya bisa membantu pertanyaan seputar program magang Diskominfosantik. Untuk pertanyaan lain, silakan hubungi admin kami di (021) 8895-1234 ext. 456. Terima kasih! 🙏',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'bukan magang',
-                'answer' => 'Maaf, saya hanya bisa menjawab pertanyaan seputar program magang. Untuk informasi lainnya, silakan datang langsung ke Diskominfosantik Bekasi atau hubungi (021) 8895-1234 ext. 456. 😊',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'pertanyaan lain',
-                'answer' => 'Maaf, saya belum bisa menjawab pertanyaan di luar topik magang. Silakan hubungi admin kami di (021) 8895-1234 ext. 456 atau email ke magang@diskominfosantik.bekasikota.go.id. Terima kasih! 🙏',
-                'priority' => 3
-            ],
-
-            // =========================================================
-            // 14. PERTANYAAN "NANYA APA" & "NOMER ADMIN" (6 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'emang saya nanya apa',
-                'answer' => 'Hmm, sepertinya Anda belum menanyakan apa-apa. 😊 Saya siap membantu pertanyaan seputar program magang Diskominfosantik, seperti: 1) Syarat magang, 2) Alur pendaftaran, 3) Durasi magang, 4) Sertifikat, 5) Benefit, 6) Jam kerja, 7) Alamat kantor, 8) Kontak Diskominfosantik. Silakan tanyakan!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'saya nanya apa',
-                'answer' => 'Sepertinya Anda belum bertanya apa-apa. 😊 Saya siap membantu! Coba tanyakan tentang: syarat magang, alur pendaftaran, durasi, sertifikat, benefit, jam kerja, alamat, atau kontak Diskominfosantik.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'nomer adminnya ada',
-                'answer' => 'Tentu! Anda bisa menghubungi admin kami di nomor (021) 8895-1234 ext. 456. Aktif Senin-Jumat, pukul 08.00-15.30 WIB. Atau email ke magang@diskominfosantik.bekasikota.go.id 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ada kontak yang bisa dihubungi',
-                'answer' => 'Tentu! Anda bisa menghubungi admin kami di nomor (021) 8895-1234 ext. 456. Aktif Senin-Jumat, pukul 08.00-15.30 WIB. Atau email ke magang@diskominfosantik.bekasikota.go.id 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ada kontak',
-                'answer' => 'Tentu! Anda bisa menghubungi admin kami di nomor (021) 8895-1234 ext. 456. Aktif Senin-Jumat, pukul 08.00-15.30 WIB. Atau email ke magang@diskominfosantik.bekasikota.go.id 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'nomer admin',
-                'answer' => 'Nomor admin: (021) 8895-1234 ext. 456. Aktif Senin-Jumat, pukul 08.00-15.30 WIB. Atau email: magang@diskominfosantik.bekasikota.go.id',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'nomor telepon admin',
-                'answer' => 'Admin bisa dihubungi di (021) 8895-1234 ext. 456. Jam kerja Senin-Jumat, 08.00-15.30 WIB.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'hubungi admin',
-                'answer' => 'Anda bisa menghubungi admin kami di (021) 8895-1234 ext. 456 atau email ke magang@diskominfosantik.bekasikota.go.id. Atau datang langsung ke Diskominfosantik Bekasi, Komplek Pemkab Bekasi, Cikarang Pusat – 17530. 😊',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 15. PERTANYAAN "AKU MAU TANYA SEPUTAR MAGANG" (5 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'aku mau tanya seputar magang',
-                'answer' => 'Tentu! Saya siap membantu pertanyaan seputar program magang Diskominfosantik. 😊 Silakan tanyakan tentang: 1) Syarat magang, 2) Alur pendaftaran, 3) Durasi magang, 4) Sertifikat, 5) Benefit/keuntungan, 6) Jam kerja, 7) Alamat kantor, 8) Kontak admin. Ada yang bisa saya bantu?',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'mau tanya magang',
-                'answer' => 'Tentu! Saya siap membantu. 😊 Silakan tanyakan tentang syarat magang, alur pendaftaran, durasi, sertifikat, benefit, jam kerja, alamat, atau kontak admin Diskominfosantik.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'tanya magang',
-                'answer' => 'Tentu! Saya siap membantu pertanyaan seputar magang Diskominfosantik. Silakan tanyakan! 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'mau nanya magang',
-                'answer' => 'Tentu! Saya siap membantu. 😊 Coba tanyakan tentang: syarat magang, alur pendaftaran, durasi, sertifikat, benefit, jam kerja, alamat, atau kontak admin.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ada yang mau ditanyakan tentang magang',
-                'answer' => 'Tentu! Saya siap membantu pertanyaan seputar program magang Diskominfosantik. Silakan tanyakan! 😊',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 16. PERTANYAAN DASAR (Kamu siapa, magang apa) (12 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'kamu siapa',
-                'answer' => 'Halo! Saya adalah asisten virtual Diskominfosantik Kabupaten Bekasi. 🤖 Saya dibuat untuk membantu menjawab pertanyaan seputar program magang di Diskominfosantik. Silakan tanyakan apa saja tentang magang! 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'siapa kamu',
-                'answer' => 'Saya asisten virtual Diskominfosantik Kabupaten Bekasi! 👋 Saya siap membantu informasi seputar program magang. Tanyakan tentang syarat, alur, durasi, sertifikat, atau hal lain tentang magang ya! 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kamu itu siapa',
-                'answer' => 'Saya adalah chatbot asisten Diskominfosantik Kabupaten Bekasi. 🤖 Tugas saya membantu calon peserta magang mendapatkan informasi yang akurat dan cepat. Ada yang bisa saya bantu? 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'perkenalan',
-                'answer' => 'Halo! Saya asisten virtual Diskominfosantik Kabupaten Bekasi. 🤖 Saya siap membantu pertanyaan seputar program magang. Tanyakan tentang syarat, alur pendaftaran, durasi, sertifikat, benefit, jam kerja, alamat, atau kontak admin! 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'program magang itu apa',
-                'answer' => 'Program magang Diskominfosantik adalah program pengembangan SDM di bidang teknologi informasi dan komunikasi yang bertujuan memberikan pengalaman kerja nyata kepada mahasiswa di lingkungan pemerintahan. Program ini terbuka untuk mahasiswa aktif D3/D4/S1 dan berlangsung 1-6 bulan dengan bimbingan mentor profesional! 🎓',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'apa itu program magang',
-                'answer' => 'Program magang Diskominfosantik adalah kesempatan bagi mahasiswa untuk belajar dan berkontribusi langsung di Dinas Komunikasi, Informatika, dan Statistik Kabupaten Bekasi. Peserta akan mendapatkan pengalaman kerja nyata, bimbingan mentor, sertifikat, dan networking! 🎓',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'magang itu apa',
-                'answer' => 'Magang adalah program pembelajaran dan pengembangan skill melalui pengalaman kerja langsung di instansi atau perusahaan. Di Diskominfosantik, magang memberikan kesempatan mahasiswa untuk terjun ke proyek-proyek digital pemerintahan dan Smart City! 💻',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'apa itu magang',
-                'answer' => 'Magang adalah kegiatan pembelajaran berbasis kerja yang bertujuan mengembangkan kompetensi mahasiswa di dunia profesional. Di Diskominfosantik, magang memberikan pengalaman berharga di bidang teknologi informasi dan komunikasi pemerintahan. 🎯',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'diskominfosantik itu apa',
-                'answer' => 'Diskominfosantik adalah Dinas Komunikasi, Informatika, dan Statistik Kabupaten Bekasi. Kami adalah leading sector dalam transformasi digital menuju Smart City Bekasi. Di sini, mahasiswa magang bisa belajar langsung tentang pengelolaan sistem informasi pemerintahan, jaringan, data, dan layanan digital publik. 🏙️',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'apa itu diskominfosantik',
-                'answer' => 'Diskominfosantik adalah singkatan dari Dinas Komunikasi, Informatika, dan Statistik Kabupaten Bekasi. Kami bertanggung jawab mengelola komunikasi publik, sistem informasi, dan data statistik untuk mendukung pembangunan Kabupaten Bekasi. 📊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'tentang magang',
-                'answer' => 'Program magang Diskominfosantik adalah program pengembangan SDM di bidang teknologi informasi dan komunikasi. Peserta akan belajar langsung tentang: 1) Sistem Informasi Pemerintahan, 2) Jaringan & Infrastruktur, 3) Data Analytics, 4) Digital Marketing, 5) Pengembangan Aplikasi. Tanyakan lebih lanjut! 😊',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'info magang',
-                'answer' => 'Info magang Diskominfosantik: 📌 Syarat: mahasiswa aktif D3/D4/S1 📌 Durasi: 1-6 bulan 📌 Benefit: sertifikat, networking, mentor, pengalaman proyek 📌 Gratis: tidak ada biaya pendaftaran 📌 Alamat: Komplek Pemkab Bekasi, Cikarang Pusat – 17530. Ada yang mau ditanyakan? 😊',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 17. PERTANYAAN TENTANG PENGALAMAN (6 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'apakah boleh jika tidak memiliki pengalaman',
-                'answer' => 'Tentu saja boleh! Program magang Diskominfosantik terbuka untuk semua mahasiswa, termasuk yang belum memiliki pengalaman kerja. 😊 Yang terpenting adalah kemauan untuk belajar, komitmen, dan menguasai skill dasar sesuai divisi yang dipilih. Selama magang, kamu akan dibimbing oleh mentor profesional, jadi pengalaman akan didapatkan selama program berlangsung! 🎓',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'apakah bisa magang tanpa pengalaman',
-                'answer' => 'Tentu saja boleh! Program magang Diskominfosantik terbuka untuk semua mahasiswa, termasuk yang belum memiliki pengalaman kerja. 😊 Yang terpenting adalah kemauan untuk belajar, komitmen, dan menguasai skill dasar sesuai divisi yang dipilih. Selama magang, kamu akan dibimbing oleh mentor profesional, jadi pengalaman akan didapatkan selama program berlangsung! 🎓',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'tidak punya pengalaman',
-                'answer' => 'Tidak masalah! Program magang ini justru dirancang untuk mahasiswa yang ingin mendapatkan pengalaman pertama di dunia kerja. 😊 Yang penting adalah semangat belajar dan willingness to learn. Mentor kami akan membimbing kamu selama magang!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'butuh pengalaman ga',
-                'answer' => 'Tidak wajib! Program magang Diskominfosantik terbuka untuk semua mahasiswa, baik yang sudah punya pengalaman maupun belum. 🎯 Yang terpenting adalah kemauan belajar, komitmen, dan skill dasar yang sesuai dengan divisi pilihan.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'boleh ga pengalaman',
-                'answer' => 'Boleh banget! Program magang ini tidak mensyaratkan pengalaman kerja sebelumnya. 😊 Yang dibutuhkan adalah mahasiswa aktif, surat pengantar, skill dasar, dan komitmen selama magang. Pengalaman akan didapatkan selama program berlangsung!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'pengalaman kerja',
-                'answer' => 'Pengalaman kerja bukan syarat utama untuk mengikuti program magang Diskominfosantik. 🎓 Kami menerima mahasiswa aktif D3/D4/S1 dari berbagai latar belakang. Yang penting adalah kemauan untuk belajar dan berkembang. Selama magang, kamu akan dibimbing oleh mentor profesional dan mendapatkan pengalaman berharga!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kalau pengalamannya',
-                'answer' => 'Pengalaman kerja bukan syarat utama untuk mengikuti program magang Diskominfosantik. 🎓 Kami menerima mahasiswa aktif D3/D4/S1 dari berbagai latar belakang. Yang penting adalah kemauan untuk belajar dan berkembang. Selama magang, kamu akan dibimbing oleh mentor profesional dan mendapatkan pengalaman berharga!',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'syarat pengalaman',
-                'answer' => 'Tidak ada syarat pengalaman kerja untuk mengikuti program magang Diskominfosantik. 😊 Program ini terbuka untuk mahasiswa aktif yang ingin mendapatkan pengalaman pertama di dunia profesional. Yang diperlukan adalah komitmen, kemauan belajar, dan skill dasar sesuai divisi.',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 18. PERTANYAAN EKSPRESIF (10 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'ish kenapa',
-                'answer' => 'Hmm, sepertinya Anda bingung atau kesal ya? 😊 Maaf jika ada yang kurang jelas. Saya siap membantu pertanyaan seputar program magang Diskominfosantik. Coba tanyakan dengan lebih spesifik, atau hubungi admin kami di (021) 8895-1234 ext. 456 ya!',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'aduh',
-                'answer' => 'Maaf ya 😊 Ada yang bisa saya bantu? Saya siap membantu pertanyaan seputar program magang Diskominfosantik. Tanyakan apa saja tentang syarat, alur, durasi, atau sertifikat magang.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ya Allah',
-                'answer' => 'Maaf ya 🙏 Saya hanya bisa membantu pertanyaan seputar program magang Diskominfosantik. Jika ada yang kurang jelas, silakan hubungi admin di (021) 8895-1234 ext. 456 atau datang langsung ke kantor Diskominfosantik Bekasi.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'kok gitu',
-                'answer' => 'Maaf jika ada yang kurang jelas. 😊 Saya siap membantu! Coba tanyakan tentang syarat magang, alur pendaftaran, durasi, sertifikat, atau benefit. Atau hubungi admin kami di (021) 8895-1234 ext. 456.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'gimana sih',
-                'answer' => 'Coba tanyakan lebih spesifik ya! 😊 Saya siap membantu pertanyaan seputar program magang Diskominfosantik. Misalnya: "syarat magang apa saja?", "bagaimana alur pendaftaran?", atau "berapa lama durasi magang?".',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'lah kok',
-                'answer' => 'Hmm, sepertinya Anda bingung. 😊 Saya siap membantu! Silakan tanyakan tentang program magang Diskominfosantik. Atau hubungi admin di (021) 8895-1234 ext. 456 untuk bantuan lebih lanjut.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'eh',
-                'answer' => 'Ya? Ada yang bisa saya bantu? 😊 Saya siap menjawab pertanyaan seputar program magang Diskominfosantik. Silakan tanyakan tentang syarat, alur, durasi, atau sertifikat magang.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'hmm',
-                'answer' => 'Hmm, ada yang ingin ditanyakan? 😊 Saya siap membantu pertanyaan seputar program magang Diskominfosantik. Tanyakan tentang syarat, alur pendaftaran, durasi, atau sertifikat magang ya!',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'oh',
-                'answer' => 'Oh, ada yang mau ditanyakan? 😊 Saya siap membantu seputar program magang Diskominfosantik. Silakan tanyakan tentang syarat, alur, durasi, atau lainnya!',
-                'priority' => 3
-            ],
-
-            // =========================================================
-            // 19. UCAPAN TERIMA KASIH & SALAM (20 data)
-            // =========================================================
-            [
-                'category' => 'Sapaan',
-                'question' => 'makasih',
-                'answer' => 'Sama-sama! 😊 Senang bisa membantu. Kalau ada pertanyaan lain seputar program magang Diskominfosantik, jangan ragu untuk bertanya ya! Semangat! 💪',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'terima kasih',
-                'answer' => 'Sama-sama! 😊 Terima kasih juga sudah bertanya. Semoga informasi yang saya berikan bermanfaat. Kalau ada yang perlu ditanyakan lagi, saya siap membantu! 🙏',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'thanks',
-                'answer' => 'You\'re welcome! 😊 Glad I could help. Feel free to ask if you have more questions about the internship program! 🙌',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'makasih banyak',
-                'answer' => 'Sama-sama! 😊 Terima kasih kembali. Semoga lancar magangnya! Kalau ada pertanyaan, saya selalu siap membantu. 🙏',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'oke makasih',
-                'answer' => 'Sama-sama! 😊 Senang bisa membantu. Semoga sukses dengan program magangnya! 🎉',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'dadah',
-                'answer' => 'Dadah! 👋 Semoga sukses dan lancar magangnya! Kalau ada pertanyaan, jangan ragu untuk kembali lagi ya. 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'bye',
-                'answer' => 'Bye! 👋 Semoga sukses dengan program magangnya! Jangan lupa cek informasi di website ya. 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'sampai jumpa',
-                'answer' => 'Sampai jumpa! 👋 Semoga sukses dan lancar magangnya! Kalau ada yang perlu ditanyakan lagi, saya siap membantu kapan saja. 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'halo',
-                'answer' => 'Halo! 👋 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan tentang syarat, alur, durasi, atau sertifikat magang ya! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'hai',
-                'answer' => 'Hai! 👋 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'hello',
-                'answer' => 'Hello! 👋 How can I help you with the internship program at Diskominfosantik? Feel free to ask! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'hey',
-                'answer' => 'Hey! 👋 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'pagi',
-                'answer' => 'Selamat pagi! 🌅 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'selamat pagi',
-                'answer' => 'Selamat pagi! 🌅 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'selamat siang',
-                'answer' => 'Selamat siang! 🌞 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'selamat sore',
-                'answer' => 'Selamat sore! 🌅 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'selamat malam',
-                'answer' => 'Selamat malam! 🌙 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 😊',
-                'priority' => 1
-            ],
-            [
-                'category' => 'Sapaan',
-                'question' => 'assalamualaikum',
-                'answer' => 'Waalaikumsalam! 😊 Ada yang bisa saya bantu seputar program magang Diskominfosantik? Silakan tanyakan apa saja! 🙏',
-                'priority' => 1
-            ],
-
-            // =========================================================
-            // 20. PERTANYAAN PROGRAM MAGANG / DIVISI (11 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'ada program magang apa aja',
-                'answer' => 'Untuk melihat daftar program magang yang tersedia, silakan lihat di halaman utama / dashboard umum ya! 😊 Di sana kamu bisa melihat semua divisi magang yang sedang dibuka, kuota, dan deskripsinya. Klik tombol "Kembali ke Daftar Divisi" atau kunjungi halaman utama website. 📋',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'program magang apa saja',
-                'answer' => 'Untuk informasi lengkap tentang program magang yang tersedia, silakan cek di halaman dashboard umum / halaman utama ya! 😊 Di sana ada daftar semua divisi magang beserta kuota dan deskripsinya. Jangan lupa cek secara berkala karena kuota terbatas! 🎯',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'magang apa aja',
-                'answer' => 'Silakan lihat di halaman utama / dashboard umum untuk melihat daftar program magang yang tersedia! 😊 Semua divisi magang ditampilkan lengkap dengan deskripsi dan kuota masing-masing. 📋',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ada magang apa',
-                'answer' => 'Untuk melihat program magang yang sedang dibuka, silakan kunjungi halaman utama website / dashboard umum ya! 😊 Di sana kamu bisa melihat semua divisi magang yang tersedia. Jangan lupa cek kuota sebelum mendaftar! 🎯',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'divisi magang apa saja',
-                'answer' => 'Silakan lihat daftar divisi magang di halaman utama / dashboard umum! 😊 Semua divisi magang Diskominfosantik ditampilkan lengkap di sana, termasuk kuota dan status ketersediaannya. 📋',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'divisi apa aja',
-                'answer' => 'Untuk melihat divisi magang yang tersedia, silakan cek di halaman utama website / dashboard umum ya! 😊 Semua divisi dengan kuota dan deskripsinya bisa kamu lihat di sana. 🎯',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'daftar divisi magang',
-                'answer' => 'Daftar divisi magang bisa dilihat di halaman utama / dashboard umum! 😊 Di sana ada semua informasi tentang divisi yang tersedia, kuota, dan deskripsi lengkapnya. Klik "Kembali ke Daftar Divisi" atau buka halaman utama website. 📋',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'divisi magang',
-                'answer' => 'Untuk melihat divisi magang yang tersedia, silakan buka halaman utama website / dashboard umum! 😊 Semua divisi magang Diskominfosantik ditampilkan di sana lengkap dengan kuota dan statusnya. 🎯',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ada divisi apa saja',
-                'answer' => 'Silakan cek di halaman utama / dashboard umum untuk melihat daftar divisi magang yang tersedia! 😊 Semua divisi ditampilkan lengkap dengan deskripsi dan kuota masing-masing. Jangan lupa cek kuota terbaru! 📋',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ada divisi magang apa',
-                'answer' => 'Untuk melihat divisi magang yang sedang dibuka, silakan kunjungi halaman utama website / dashboard umum! 😊 Di sana kamu bisa melihat semua divisi magang yang tersedia beserta kuotanya. 🎯',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'lihat divisi magang',
-                'answer' => 'Silakan buka halaman utama / dashboard umum untuk melihat daftar divisi magang yang tersedia! 😊 Semua informasi divisi, kuota, dan statusnya bisa kamu lihat di sana. 📋',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 21. PERTANYAAN "DAPETNYA APA DONG?" (10 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'dapetnya apa dong',
-                'answer' => 'Kamu akan mendapatkan: 1) Sertifikat resmi dari Diskominfosantik Bekasi, 2) Pengalaman kerja nyata di proyek Smart City, 3) Bimbingan dari mentor profesional, 4) Networking dengan pegawai dan profesional IT, 5) Peluang karir di instansi pemerintah. 📜🎓✨',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'dapet apa dong',
-                'answer' => 'Kamu akan dapat sertifikat resmi, pengalaman kerja di proyek Smart City, bimbingan mentor, dan networking! 😊🎓',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'dapetnya apa',
-                'answer' => 'Dapet sertifikat resmi, pengalaman kerja nyata, bimbingan mentor profesional, dan relasi di pemerintahan! 📜💪',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'dapat apa dari magang',
-                'answer' => 'Dapat: 1) Sertifikat resmi, 2) Pengalaman kerja, 3) Bimbingan mentor, 4) Networking, 5) Peluang karir. Pokoknya banyak banget manfaatnya! 😊🎉',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'apa yang didapat dari magang',
-                'answer' => 'Yang didapat: Sertifikat resmi, pengalaman proyek Smart City, bimbingan mentor profesional, jaringan di pemerintahan, dan peluang karir! 📜🎯',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'manfaat magang',
-                'answer' => 'Manfaat magang: 1) Sertifikat resmi, 2) Pengalaman kerja, 3) Bimbingan mentor, 4) Networking, 5) Peluang karir. Sangat berharga untuk masa depanmu! 😊💪',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'keuntungan magang',
-                'answer' => 'Keuntungan magang: Sertifikat resmi, pengalaman kerja langsung di proyek Smart City, bimbingan profesional, jaringan di sektor pemerintahan, peluang karir, dan fasilitas kerja lengkap. 🎓✨',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'dapet uang ga',
-                'answer' => 'Maaf, program magang ini tidak memberikan uang saku atau gaji. Tapi kamu akan mendapatkan sertifikat resmi, pengalaman kerja, bimbingan mentor, dan networking yang sangat berharga untuk masa depan karirmu! 😊📜',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'dapet uang nggak',
-                'answer' => 'Tidak ada uang saku atau gaji. Tapi kamu akan dapat sertifikat resmi, pengalaman kerja, bimbingan mentor, dan networking yang berharga! 😊🎓',
-                'priority' => 2
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'dapet duit ga',
-                'answer' => 'Tidak dapet uang ya. Tapi dapet sertifikat resmi, pengalaman kerja, bimbingan mentor, dan networking! 😊📜',
-                'priority' => 2
-            ],
-
-            // =========================================================
-            // 22. PERTANYAAN "OH JADI GA PUNYA NAMA?" (5 data)
-            // =========================================================
-            [
-                'category' => 'FAQ',
-                'question' => 'oh jadi ga punya nama',
-                'answer' => 'Maaf, saya tidak bisa menjawab pertanyaan tersebut. 😊 Saya hanya bisa membantu seputar program magang Diskominfosantik. Silakan tanyakan tentang syarat, alur, durasi, sertifikat, atau hubungi admin di (021) 8895-1234 ext. 456.',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'ga punya nama',
-                'answer' => 'Maaf, saya tidak bisa menjawab pertanyaan tersebut. Saya hanya bisa membantu seputar program magang Diskominfosantik. 😊',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'punya nama ga',
-                'answer' => 'Maaf, pertanyaan Anda di luar topik magang. Saya hanya bisa membantu seputar program magang Diskominfosantik. Silakan hubungi admin di (021) 8895-1234 ext. 456. 🙏',
-                'priority' => 3
-            ],
-            [
-                'category' => 'FAQ',
-                'question' => 'nama kamu siapa',
-                'answer' => 'Saya asisten virtual Diskominfosantik! 🤖 Saya dibuat untuk membantu pertanyaan seputar program magang. Silakan tanyakan tentang syarat, alur, durasi, atau sertifikat magang ya! 😊',
-                'priority' => 2
-            ],
-            // =========================================================
-            // 23. ATURAN PAKAIAN & SERAGAM MAGANG
-            // =========================================================
-            [
-                'category' => 'Aturan & Tata Tertib',
-                'question' => 'ketentuan pakaian atau seragam magang',
-                'answer' => 'Peserta magang diwajibkan mengenakan pakaian formal dan rapi (kemeja berkerah, celana/rok bahan warna gelap, dan sepatu tertutup). Kaos oblong dan celana jeans tidak diperkenankan selama berada di kantor.',
-                'priority' => 2
-            ],
-            [
-                'category' => 'Aturan & Tata Tertib',
-                'question' => 'pakaian dinas harian kemeja rapi seragam magang',
-                'answer' => 'Pakaian magang wajib kemeja rapi berkerah, celana/rok bahan formal, dan sepatu tertutup. Pakaian bebas/kaos tidak diperkenankan.',
-                'priority' => 2
-            ],
-            // =========================================================
-            // 24. SISA KUOTA PENERIMAAN MAGANG
-            // =========================================================
-            [
-                'category' => 'Kuota Penerimaan',
-                'question' => 'sisa kuota penerimaan magang',
-                'answer' => 'Informasi sisa kuota penerimaan magang untuk setiap divisi dapat Anda pantau secara langsung pada halaman Daftar Divisi di website SIMAGANG.',
-                'priority' => 2
-            ],
+            // ================================================================
+            // 15. PERCAKAPAN UMUM (dijawab melalui mekanisme Dice yang sama)
+            // ================================================================
+            ['category' => 'Percakapan Umum', 'question' => 'halo', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'selamat pagi', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'selamat siang', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'selamat sore', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'selamat malam', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'assalamualaikum', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'permisi', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'punten', 'answer' => $sapaan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'terima kasih', 'answer' => $terimaKasih, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'kamu siapa', 'answer' => $identitasBot, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'bot ini bisa apa', 'answer' => $identitasBot, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'keren', 'answer' => $apresiasi, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'pintar', 'answer' => $apresiasi, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'mantap', 'answer' => $apresiasi, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'oke', 'answer' => $konfirmasi, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'dadah', 'answer' => $pamitan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'bye', 'answer' => $pamitan, 'priority' => 10],
+            ['category' => 'Percakapan Umum', 'question' => 'sampai jumpa', 'answer' => $pamitan, 'priority' => 10],
         ];
 
-        DB::table('knowledge_base')->insert($data);
+        foreach ($knowledgeBases as $item) {
+            KnowledgeBase::create([
+                'category' => $item['category'],
+                'question' => $item['question'],
+                'answer' => $item['answer'],
+                'is_active' => true,
+                'priority' => $item['priority'],
+            ]);
+        }
     }
 }

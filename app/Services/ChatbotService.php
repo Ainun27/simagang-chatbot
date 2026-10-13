@@ -5,548 +5,641 @@ namespace App\Services;
 use App\Models\KnowledgeBase;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * =========================================================================================
+ * ChatbotService
+ * =========================================================================================
+ * Knowledge-Based Chatbot Informasi Magang Berbasis Web (retrieval-based) dengan alur:
+ *
+ *   Pertanyaan pengguna
+ *     -> Text Preprocessing:
+ *          1. Case Folding
+ *          2. Cleansing
+ *          3. Tokenisasi
+ *          4. Stopword Removal
+ *          5. Normalisasi Kata (aturan + kamus)
+ *     -> Himpunan character bigram (set-based)
+ *     -> Sørensen-Dice Similarity terhadap setiap pertanyaan di knowledge base
+ *     -> Pertanyaan dengan nilai tertinggi dipakai jika nilai >= threshold
+ *     -> Jika tidak memenuhi threshold, sistem memberikan respons fallback
+ *
+ * Penyelarasan dengan Bab I proposal:
+ * - Urutan preprocessing mengikuti Batasan Masalah (stopword removal sebelum normalisasi kata).
+ * - Normalisasi hanya memakai aturan dan kamus yang ditentukan secara eksplisit
+ *   (kamus canonicalMap dan aturan pelepasan enklitik -nya/-lah/-kah/-pun).
+ * - Tidak ada filter kata off-topic maupun deteksi intent di luar knowledge base.
+ *   Sapaan, terima kasih, dan identitas bot disimpan sebagai entri knowledge base
+ *   (kategori "Percakapan Umum"), sehingga seluruh keputusan respons ditentukan
+ *   oleh Sørensen-Dice Similarity dan threshold.
+ * - Threshold bukan nilai tetap: 0,60 hanya baseline awal dan variasinya diuji
+ *   melalui EvaluasiChatbotController (threshold sweep).
+ * - Nilai priority pada knowledge base hanya dipakai sebagai pemutus seri (tie-breaker)
+ *   ketika skor Dice identik.
+ * =========================================================================================
+ */
 class ChatbotService
 {
+    /**
+     * Ambang batas kemiripan (similarity threshold) baseline.
+     * Variasi nilai (0,50 - 0,80) dievaluasi melalui threshold sweep pada
+     * EvaluasiChatbotController untuk menentukan nilai yang dipakai.
+     */
+    protected float $similarityThreshold = 0.60;
+
+    /**
+     * Pencatatan log setiap pertanyaan (dimatikan saat benchmark / threshold sweep).
+     */
+    protected bool $loggingEnabled = true;
+
+    /**
+     * Cache knowledge base yang sudah melewati preprocessing.
+     */
+    protected ?array $processedKnowledgeBase = null;
+
+    /**
+     * Daftar stopwords bahasa Indonesia (kata tugas / partikel pengisi).
+     * Pengecekan dilakukan pada token hasil tokenisasi sebelum normalisasi, sehingga
+     * bentuk singkatan stopword (yg, dgn, utk, dr, kpd, tsb, sbg, jd, nya) ikut didaftarkan.
+     * Kata substantif pembeda topik magang tidak dimasukkan ke daftar ini.
+     */
     protected array $stopwords = [
-        'apa', 'bagaimana', 'siapa', 'dimana', 'kapan', 'mengapa', 'kenapa', 'gimana',
         'yang', 'di', 'ke', 'dari', 'dan', 'atau', 'untuk', 'dengan', 'tentang',
         'pada', 'dalam', 'oleh', 'sebagai', 'ini', 'itu', 'tersebut', 'jadi',
-        'saya', 'kamu', 'kami', 'mereka', 'anda', 'aku', 'kita', 'dia',
-        'ada', 'bisa', 'akan', 'telah', 'sudah', 'belum', 'lagi', 'saja', 'aja',
-        'apakah', 'bagi', 'tanpa', 'setelah', 'sebelum', 'sih', 'dung',
-        'ga', 'gak', 'nggak', 'ya', 'nih', 'dong', 'deh', 'lah', 'pun', 'kok', 'kan',
-        'oh', 'eh', 'hmm', 'aduh', 'wah', 'nah', 'lho', 'loh', 'pas', 'tuh',
-        'kak', 'kakak', 'min', 'admin', 'gan', 'sis', 'bro', 'bang', 'mas', 'mba', 'mbak'
+        'apakah', 'bagaimana', 'adalah', 'akan', 'agar', 'secara', 'selama', 'saat',
+        'yg', 'dgn', 'utk', 'dr', 'kpd', 'tsb', 'sbg', 'jd', 'nya',
+        'saya', 'kamu', 'kami', 'mereka', 'anda', 'aku', 'kita', 'dia', 'ku',
+        'saja', 'aja', 'sih', 'dung', 'dong', 'deh', 'lah', 'pun', 'kok', 'kan',
+        'ya', 'nih', 'oh', 'eh', 'hmm', 'aduh', 'wah', 'nah', 'lho', 'loh', 'pas', 'tuh',
+        'kak', 'kakak', 'min', 'admin', 'gan', 'sis', 'bro', 'bang', 'mas', 'mba', 'mbak',
+        'disana', 'disini', 'disitu', 'sana', 'sini', 'situ',
+        'mau', 'ingin', 'pengen', 'tanya', 'nanya', 'bertanya',
     ];
 
-    // Canonical Normalization Dictionary (Synonyms mapped to 1 standard root term)
+    /**
+     * Kamus normalisasi kanonikal (canonical map).
+     * Menyeragamkan singkatan, typo, slang, dan istilah alternatif ke bentuk baku
+     * yang ditentukan secara eksplisit.
+     */
     protected array $canonicalMap = [
-        // Topik Lokasi, Alamat & Kantor
-        'lokasi' => 'alamat',
-        'dimana' => 'alamat',
-        'dmana' => 'alamat',
-        'dmn' => 'alamat',
-        'letak' => 'alamat',
-        'posisi' => 'alamat',
-        'posisinya' => 'alamat',
-        'tempat' => 'alamat',
-        'kantor' => 'alamat',
-        'kantornya' => 'alamat',
-        'kntor' => 'alamat',
-        'almat' => 'alamat',
-        'almtt' => 'alamat',
-        'diskominfo' => 'alamat',
-        'diskominfosantik' => 'alamat',
-        'dskmnfo' => 'alamat',
 
-        // Topik Persyaratan & Dokumen
-        'syarat' => 'syarat',
-        'syrat' => 'syarat',
-        'srat' => 'syarat',
-        'persyaratan' => 'syarat',
-        'kondisi' => 'syarat',
-        'ketentuan' => 'syarat',
-        'dokumen' => 'syarat',
-        'dkumun' => 'syarat',
-        'berkas' => 'syarat',
-        'kudu' => 'syarat',
-        'harus' => 'syarat',
-        'wajib' => 'syarat',
-        'perlu' => 'syarat',
-        'butuh' => 'syarat',
-        'cv' => 'syarat',
-        'laptop' => 'fasilitas',
-        'perangkat' => 'fasilitas',
-        'komputer' => 'fasilitas',
-        'pc' => 'fasilitas',
+        // ---------------------------------------------------------------------
+        // 1. Singkatan & Typo Kata Tanya / Partikel / Keterangan
+        // ---------------------------------------------------------------------
+        'dmn' => 'dimana',
+        'dmana' => 'dimana',
+        'brp' => 'berapa',
+        'brapa' => 'berapa',
+        'lm' => 'lama',
+        'kpn' => 'kapan',
+        'gmn' => 'gimana',
+        'bgmn' => 'gimana',
+        'knp' => 'kenapa',
+        'ad' => 'ada',
+        'bs' => 'bisa',
+        'klo' => 'kalau',
+        'kalo' => 'kalau',
+        'kl' => 'kalau',
+        'kpd' => 'kepada',
+        'krn' => 'karena',
+        'utk' => 'untuk',
+        'dr' => 'dari',
+        'dgn' => 'dengan',
+        'yg' => 'yang',
+        'tsb' => 'tersebut',
+        'sdh' => 'sudah',
+        'udh' => 'sudah',
+        'blm' => 'belum',
+        'bbrp' => 'beberapa',
+        'msh' => 'masih',
+        'msih' => 'masih',
+        'stlh' => 'setelah',
+        'jml' => 'jumlah',
 
-        // Topik Waktu & Durasi
-        'durasi' => 'durasi',
-        'lama' => 'durasi',
-        'brapa' => 'durasi',
-        'lm' => 'durasi',
-        'waktu' => 'durasi',
-        'periode' => 'durasi',
-        'bulan' => 'durasi',
-        'bln' => 'durasi',
-        'berapa_lama' => 'durasi',
+        // ---------------------------------------------------------------------
+        // 2. Slang & Bahasa Informal Negasi / Verba / Adjektiva
+        // ---------------------------------------------------------------------
+        'gk' => 'tidak',
+        'ga' => 'tidak',
+        'gak' => 'tidak',
+        'nggak' => 'tidak',
+        'ngga' => 'tidak',
+        'ndak' => 'tidak',
+        'tdk' => 'tidak',
+        'dapet' => 'dapat',
+        'dapetin' => 'dapat',
+        'dapetnya' => 'dapat',
+        'dapatnya' => 'dapat',
+        'dpt' => 'dapat',
+        'kelar' => 'selesai',
+        'kudu' => 'wajib',
+        'harus' => 'wajib',
+        'hrs' => 'wajib',
+        'wajibkan' => 'wajib',
 
-        // Topik Jam Kerja & Operasional
-        'jam' => 'jam_kerja',
-        'kerja' => 'jam_kerja',
-        'jm' => 'jam_kerja',
-        'krja' => 'jam_kerja',
-        'operasional' => 'jam_kerja',
-        'opresional' => 'jam_kerja',
-        'buka' => 'jam_kerja',
-        'tutup' => 'jam_kerja',
-        'pulang' => 'jam_kerja',
-        'masuk' => 'jam_kerja',
-        'wfh' => 'jam_kerja',
-        'remote' => 'jam_kerja',
-        'daring' => 'jam_kerja',
-
-        // Topik Kuota & Ketersediaan
-        'kuota' => 'kuota',
-        'kouta' => 'kuota',
-        'qouta' => 'kuota',
-        'sisa' => 'kuota',
-        'penerimaan' => 'kuota',
-        'pnrmaan' => 'kuota',
-        'kapasitas' => 'kuota',
-
-        // Topik Kontak & Hubungi
-        'kontak' => 'kontak',
-        'telepon' => 'kontak',
-        'telp' => 'kontak',
-        'tlp' => 'kontak',
-        'email' => 'kontak',
-        'emil' => 'kontak',
-        'nomor' => 'kontak',
-        'nomer' => 'kontak',
-        'no' => 'kontak',
-        'wa' => 'kontak',
-        'whatsapp' => 'kontak',
-        'hubungi' => 'kontak',
-        'dihubungi' => 'kontak',
-        'hubungin' => 'kontak',
-
-        // Topik Pakaian & Seragam
-        'pakaian' => 'pakaian',
-        'pkain' => 'pakaian',
-        'seragam' => 'pakaian',
-        'sragam' => 'pakaian',
-        'baju' => 'pakaian',
-        'kemeja' => 'pakaian',
-        'busana' => 'pakaian',
-        'dresscode' => 'pakaian',
-
-        // Topik Divisi & Unit Penempatan
-        'divisi' => 'divisi',
-        'dvisi' => 'divisi',
-        'unit' => 'divisi',
-        'penempatan' => 'divisi',
-        'bidang' => 'divisi',
-        'jurusan' => 'divisi',
-        'it' => 'divisi',
-        'programmer' => 'divisi',
-
-        // Topik Uang Saku, Makan & Finansial
-        'uang' => 'uang_saku',
-        'saku' => 'uang_saku',
-        'jajan' => 'uang_saku',
-        'gaji' => 'uang_saku',
-        'honor' => 'uang_saku',
-        'upah' => 'uang_saku',
-        'bayaran' => 'uang_saku',
-        'kompensasi' => 'uang_saku',
-        'insentif' => 'uang_saku',
-        'duit' => 'uang_saku',
-        'cuan' => 'uang_saku',
-        'fee' => 'uang_saku',
-        'ongkos' => 'uang_saku',
-        'transport' => 'uang_saku',
-        'bensin' => 'uang_saku',
-        'makan' => 'uang_saku',
-        'mkn' => 'uang_saku',
-        'mknan' => 'uang_saku',
-        'konsumsi' => 'uang_saku',
-        'konsum' => 'uang_saku',
-        'snack' => 'uang_saku',
-        'lunch' => 'uang_saku',
-
-        // Topik Pendaftaran & Magang
+        // ---------------------------------------------------------------------
+        // 3. Istilah Domain Magang & Instansi (Singkatan & Istilah Alternatif)
+        // ---------------------------------------------------------------------
+        'mgang' => 'magang',
         'internship' => 'magang',
         'pkl' => 'magang',
-        'mgang' => 'magang',
-        'praktik' => 'magang',
-        'praktek' => 'magang',
+        'kp' => 'magang',
+        'diskominfo' => 'diskominfosantik',
+        'dskmnfo' => 'diskominfosantik',
+        'kominfo' => 'diskominfosantik',
+        'diskominfotik' => 'diskominfosantik',
+        'pemda' => 'pemkab',
+
+        // ---------------------------------------------------------------------
+        // 4. Pendaftaran & Registrasi (Variasi Istilah & Serapan)
+        // ---------------------------------------------------------------------
         'pendaftaran' => 'daftar',
         'pndaftaran' => 'daftar',
-        'daftar' => 'daftar',
+        'pndaftran' => 'daftar',
         'daftr' => 'daftar',
         'dftr' => 'daftar',
         'register' => 'daftar',
         'registrasi' => 'daftar',
-        'join' => 'daftar',
-        'onlen' => 'daftar',
-        'online' => 'daftar',
+        'onlen' => 'online',
+        'regis' => 'daftar',
 
-        // Topik Fasilitas & Sertifikat
-        'sertifikat' => 'sertifikat',
+        // ---------------------------------------------------------------------
+        // 5. Syarat & Dokumen (Variasi Istilah & Typo)
+        // ---------------------------------------------------------------------
+        'syrat' => 'syarat',
+        'srat' => 'syarat',
+        'persyaratan' => 'syarat',
+        'syarat2' => 'syarat',
+        'brkas' => 'berkas',
+        'dkumun' => 'dokumen',
+        'rkomendasi' => 'rekomendasi',
+
+        // ---------------------------------------------------------------------
+        // 6. Alamat & Kontak (Typo & Singkatan)
+        // ---------------------------------------------------------------------
+        'almat' => 'alamat',
+        'almt' => 'alamat',
+        'almtt' => 'alamat',
+        'lksi' => 'lokasi',
+        'kntor' => 'kantor',
+        'telp' => 'telepon',
+        'tlp' => 'telepon',
+        'tlpn' => 'telepon',
+        'nomer' => 'nomor',
+        'nmr' => 'nomor',
+        'no' => 'nomor',
+        'wa' => 'whatsapp',
+        'emil' => 'email',
+        'hubungin' => 'hubungi',
+
+        // ---------------------------------------------------------------------
+        // 7. Waktu & Operasional
+        // ---------------------------------------------------------------------
+        'krja' => 'kerja',
+        'jm' => 'jam',
+        'bln' => 'bulan',
+        'opresional' => 'operasional',
+        'plang' => 'pulang',
+        'hri' => 'hari',
+        'hr' => 'hari',
+        'jmat' => 'jumat',
+
+        // ---------------------------------------------------------------------
+        // 8. Finansial (Typo & Slang Terbatas)
+        // ---------------------------------------------------------------------
+        'duit' => 'uang',
+        'cuan' => 'uang',
+        'fee' => 'uang',
+        'gji' => 'gaji',
+        'sakku' => 'saku',
+
+        // ---------------------------------------------------------------------
+        // 9. Pakaian & Seragam
+        // ---------------------------------------------------------------------
+        'pkaian' => 'pakaian',
+        'pkain' => 'pakaian',
+        'baju' => 'pakaian',
+        'kemeja' => 'pakaian',
+        'sragam' => 'seragam',
+        'dresscode' => 'pakaian',
+
+        // ---------------------------------------------------------------------
+        // 10. Kuota, Divisi & Akademik (Typo & Singkatan)
+        // ---------------------------------------------------------------------
+        'kouta' => 'kuota',
+        'qouta' => 'kuota',
+        'kuotta' => 'kuota',
+        'pnrmaan' => 'penerimaan',
+        'dvisi' => 'divisi',
+        'komputr' => 'komputer',
+        'mhswa' => 'mahasiswa',
+        'mhs' => 'mahasiswa',
+        'kmpus' => 'kampus',
+        'univ' => 'kampus',
+
+        // ---------------------------------------------------------------------
+        // 11. Sertifikat & Fasilitas (Typo Murni)
+        // ---------------------------------------------------------------------
         'sertif' => 'sertifikat',
         'srtfkat' => 'sertifikat',
+        'srtfikat' => 'sertifikat',
         'sertipikat' => 'sertifikat',
-        'ijazah' => 'sertifikat',
-        'piagam' => 'sertifikat',
-        'keuntungan' => 'fasilitas',
-        'benefit' => 'fasilitas',
-        
-        // Topik Kantin, Makanan & Tempat Makan Sekitar
-        'kantin' => 'kantin',
+        'mkn' => 'makan',
         'kntin' => 'kantin',
         'kanteen' => 'kantin',
-        'tukang' => 'kantin',
-        'pedagang' => 'kantin',
-        'penjual' => 'kantin',
-        'warung' => 'kantin',
-        'warteg' => 'kantin',
-        'resto' => 'kantin',
-        'restoran' => 'kantin',
-        'kuliner' => 'kantin',
-        'lapar' => 'kantin',
-        'laper' => 'kantin',
-        'makan' => 'makan',
-        'mkn' => 'makan',
-        'makanan' => 'makan',
-        'konsumsi' => 'makan',
-        'konsum' => 'makan',
-        'snack' => 'makan',
-        'lunch' => 'makan',
-        'deket' => 'alamat',
-        'dekat' => 'alamat',
-        'sekitar' => 'alamat',
-        'sekitarnya' => 'alamat',
-        'sana' => 'alamat',
-        'sini' => 'alamat',
-        
-        // Kata Bantu / Verba Umum (Normalized to base)
-        'dpt' => 'dapat',
-        'dpet' => 'dapat',
-        'dapet' => 'dapat',
-        'dapetin' => 'dapat',
-        'dapetkan' => 'dapat',
-        'dptnya' => 'dapat',
-        'nerima' => 'dapat',
-        'peroleh' => 'dapat',
-        'terima' => 'dapat',
-        'disediakan' => 'dapat',
+
+        // ---------------------------------------------------------------------
+        // 12. Percakapan Umum (diseragamkan agar cocok dengan entri knowledge base)
+        // ---------------------------------------------------------------------
+        'hai' => 'halo',
+        'hallo' => 'halo',
+        'helo' => 'halo',
+        'hello' => 'halo',
+        'hei' => 'halo',
+        'hey' => 'halo',
+        'hi' => 'halo',
+        'kulonuwun' => 'punten',
+        'makasih' => 'terima kasih',
+        'makasi' => 'terima kasih',
+        'mksih' => 'terima kasih',
+        'terimakasih' => 'terima kasih',
+        'thanks' => 'terima kasih',
+        'thx' => 'terima kasih',
+        'tks' => 'terima kasih',
+        'tengkyu' => 'terima kasih',
+        'pinter' => 'pintar',
+        'ok' => 'oke',
+        'okey' => 'oke',
+        'okay' => 'oke',
+        'siap' => 'oke',
+        'sip' => 'oke',
+        'noted' => 'oke',
+        'ngerti' => 'oke',
+        'dadaah' => 'dadah',
     ];
 
-    // Substantive Keywords that carry heavy domain meaning
-    protected array $substantiveKeywords = [
-        'alamat', 'syarat', 'durasi', 'uang_saku', 'magang', 'daftar',
-        'sertifikat', 'fasilitas', 'divisi', 'kuota', 'jam_kerja',
-        'kontak', 'pakaian', 'kantin', 'makan'
+    /**
+     * Kata dasar yang dikenali aturan pelepasan enklitik (-nya, -lah, -kah, -pun).
+     * Akhiran hanya dilepas jika kata dasarnya ada di kamus canonicalMap atau di daftar ini,
+     * sehingga kata lain yang kebetulan berakhiran sama tidak terpotong.
+     */
+    protected array $rootWords = [
+        'kantor', 'magang', 'alamat', 'lokasi', 'durasi', 'kuota', 'divisi', 'sertifikat',
+        'syarat', 'berkas', 'dokumen', 'laptop', 'jurusan', 'prodi', 'kampus', 'seragam',
+        'pakaian', 'fasilitas', 'mentor', 'laporan', 'uang', 'saku', 'gaji', 'biaya',
+        'daftar', 'online', 'kontak', 'email', 'telepon', 'whatsapp', 'operasional',
+        'jam', 'kerja', 'libur', 'absensi', 'kantin', 'surat', 'proposal', 'benefit',
     ];
 
-    protected array $offTopicKeywords = [
-        'kamu cantik', 'kamu ganteng', 'aku suka', 'punya pacar',
-        'liburan', 'film', 'musik', 'game', 'mabar',
-        'nonton', 'tidur', 'jalan', 'main', 'belanja', 'nama kamu',
-        'resep', 'masak', 'bioskop', 'pacaran', 'jodoh', 'zodiak',
-        'presiden', 'politik', 'cuaca', 'distro', 'mall', 'pasar'
-    ];
+    /**
+     * Mengatur nilai ambang batas kemiripan (similarity threshold).
+     */
+    public function setSimilarityThreshold(float $threshold): void
+    {
+        $this->similarityThreshold = max(0.0, min(1.0, $threshold));
+    }
 
+    /**
+     * Mendapatkan nilai ambang batas kemiripan saat ini.
+     */
+    public function getSimilarityThreshold(): float
+    {
+        return $this->similarityThreshold;
+    }
+
+    /**
+     * Mengaktifkan / menonaktifkan pencatatan log (dipakai saat benchmark massal).
+     */
+    public function setLoggingEnabled(bool $enabled): void
+    {
+        $this->loggingEnabled = $enabled;
+    }
+
+    public function isLoggingEnabled(): bool
+    {
+        return $this->loggingEnabled;
+    }
+
+    /**
+     * Mengosongkan cache knowledge base (panggil setelah isi knowledge base berubah).
+     */
+    public function flushKnowledgeBaseCache(): void
+    {
+        $this->processedKnowledgeBase = null;
+    }
+
+    /**
+     * Menerima pertanyaan pengguna, memprosesnya melalui pipeline preprocessing dan
+     * Sørensen-Dice Similarity, lalu mengembalikan respons terstruktur.
+     */
     public function getResponse(string $userInput): array
     {
-        $lowerInput = strtolower(trim($userInput));
+        $trimmedInput = trim($userInput);
 
-        // 1. Cek Percakapan Umum / Basa-Basi (Sapaan, Terima Kasih, Identitas Bot, Pamitan)
-        $conversationalResponse = $this->checkConversationalIntent($userInput);
-        if ($conversationalResponse !== null) {
-            return $conversationalResponse;
+        if ($trimmedInput === '') {
+            return $this->buildFallback(0.0);
         }
 
-        // 2. Cek Kata Kunci Di Luar Topik (Off-Topic Filter)
-        foreach ($this->offTopicKeywords as $keyword) {
-            if (str_contains($lowerInput, $keyword)) {
-                return [
-                    'status' => 'fallback',
-                    'answer' => $this->getFallbackResponse(),
-                    'category' => null,
-                    'confidence' => 0,
-                    'question_matched' => null
-                ];
-            }
+        // 1. Text preprocessing (case folding, cleansing, tokenisasi, stopword removal, normalisasi)
+        $processedInput = $this->preprocess($trimmedInput);
+
+        if ($processedInput === '') {
+            return $this->buildFallback(0.0);
         }
 
-        $cleanTokens = $this->extractCanonicalTokens($userInput);
-        Log::info('Chatbot Input:', ['original' => $userInput, 'tokens' => $cleanTokens]);
-        
-        // 3. Pencocokan Cerdas Terhadap Basis Pengetahuan (Knowledge Base)
-        $bestMatch = $this->findBestMatch($cleanTokens, $userInput);
+        // 2. Pencocokan dengan knowledge base menggunakan Sørensen-Dice Similarity
+        $ranking = $this->rankKnowledgeBase($processedInput, 1);
+        $bestMatch = $ranking[0]['item'] ?? null;
+        $bestScore = $ranking[0]['score'] ?? 0.0;
+        $confidence = round($bestScore * 100, 2);
 
-        if ($bestMatch) {
-            Log::info('Chatbot Match:', [
-                'question' => $bestMatch->question,
-                'score' => $bestMatch->score ?? 0,
-                'category' => $bestMatch->category
+        // 3. Keputusan berdasarkan threshold
+        $isMatch = ($bestMatch !== null && $bestScore > 0.0 && $bestScore >= $this->similarityThreshold);
+
+        if ($this->loggingEnabled) {
+            Log::info('Chatbot Similarity Evaluation', [
+                'original_input' => $trimmedInput,
+                'processed_input' => $processedInput,
+                'matched_question' => $bestMatch?->question,
+                'dice_score' => round($bestScore, 4),
+                'confidence' => $confidence,
+                'threshold' => $this->similarityThreshold,
+                'status' => $isMatch ? 'success' : 'fallback',
             ]);
-            
+        }
+
+        if ($isMatch) {
             return [
                 'status' => 'success',
                 'answer' => $bestMatch->answer,
                 'category' => $bestMatch->category,
-                'confidence' => $bestMatch->confidence ?? 80,
-                'question_matched' => $bestMatch->question
+                'confidence' => $confidence,
+                'question_matched' => $bestMatch->question,
+                'score' => $bestScore,
             ];
         }
 
-        Log::info('Chatbot: No match found, using fallback');
-        
+        return $this->buildFallback($confidence, $bestScore);
+    }
+
+    /**
+     * Menjalankan tahapan text preprocessing dan mengembalikan hasil akhir berupa string.
+     */
+    public function preprocess(string $text): string
+    {
+        return $this->preprocessWithSteps($text)['result'];
+    }
+
+    /**
+     * Menjalankan tahapan text preprocessing dan mengembalikan hasil setiap tahap
+     * (dipakai untuk visualisasi pipeline pada halaman evaluasi).
+     *
+     * 1. Case Folding   : mengubah seluruh huruf menjadi huruf kecil.
+     * 2. Cleansing      : menghapus tanda baca dan karakter selain huruf, angka, dan spasi.
+     * 3. Tokenisasi     : memecah kalimat menjadi token kata.
+     * 4. Stopword Removal : membuang kata tugas / partikel pengisi.
+     * 5. Normalisasi    : menyeragamkan singkatan, slang, typo, dan istilah alternatif
+     *                     menggunakan kamus dan aturan yang telah ditentukan.
+     */
+    public function preprocessWithSteps(string $text): array
+    {
+        // Tahap 1: Case Folding
+        $caseFolded = mb_strtolower(trim($text), 'UTF-8');
+
+        // Tahap 2: Cleansing
+        $cleansed = preg_replace('/[^a-z0-9\s]/u', ' ', $caseFolded);
+        $cleansed = trim(preg_replace('/\s+/', ' ', $cleansed));
+
+        if ($cleansed === '') {
+            return [
+                'case_folding' => $caseFolded,
+                'cleansing' => '',
+                'tokens' => [],
+                'after_stopword' => [],
+                'normalized' => [],
+                'result' => '',
+            ];
+        }
+
+        // Tahap 3: Tokenisasi
+        $tokens = explode(' ', $cleansed);
+
+        // Tahap 4: Stopword Removal
+        $afterStopword = [];
+        foreach ($tokens as $token) {
+            if ($token !== '' && !in_array($token, $this->stopwords, true)) {
+                $afterStopword[] = $token;
+            }
+        }
+
+        // Tahap 5: Normalisasi Kata (kamus + aturan)
+        $normalized = [];
+        foreach ($afterStopword as $token) {
+            $normalized[] = $this->normalizeToken($token);
+        }
+
+        return [
+            'case_folding' => $caseFolded,
+            'cleansing' => $cleansed,
+            'tokens' => $tokens,
+            'after_stopword' => $afterStopword,
+            'normalized' => $normalized,
+            'result' => implode(' ', $normalized),
+        ];
+    }
+
+    /**
+     * Normalisasi satu token:
+     * 1. Pencarian langsung pada kamus canonicalMap.
+     * 2. Aturan pelepasan enklitik (-nya, -lah, -kah, -pun) bila kata dasarnya dikenali.
+     */
+    protected function normalizeToken(string $token): string
+    {
+        if (isset($this->canonicalMap[$token])) {
+            return $this->canonicalMap[$token];
+        }
+
+        if (mb_strlen($token, 'UTF-8') > 4) {
+            foreach (['nya', 'lah', 'kah', 'pun'] as $suffix) {
+                $suffixLength = mb_strlen($suffix, 'UTF-8');
+
+                if (mb_substr($token, -$suffixLength, $suffixLength, 'UTF-8') === $suffix) {
+                    $root = mb_substr($token, 0, mb_strlen($token, 'UTF-8') - $suffixLength, 'UTF-8');
+
+                    if (isset($this->canonicalMap[$root])) {
+                        return $this->canonicalMap[$root];
+                    }
+
+                    if (in_array($root, $this->rootWords, true)) {
+                        return $root;
+                    }
+                }
+            }
+        }
+
+        return $token;
+    }
+
+    /**
+     * Ekstraksi token hasil normalisasi (helper untuk inspektor evaluasi).
+     */
+    public function extractCanonicalTokens(string $text): array
+    {
+        return $this->preprocessWithSteps($text)['normalized'];
+    }
+
+    /**
+     * Membentuk himpunan character bigram (2 karakter berturutan) dari string.
+     * Menggunakan himpunan unik (set) berbasis karakter.
+     */
+    public function generateBigrams(string $text): array
+    {
+        $text = preg_replace('/\s+/', ' ', trim($text));
+        $length = mb_strlen($text, 'UTF-8');
+
+        if ($length < 2) {
+            return $length === 1 ? [$text] : [];
+        }
+
+        $bigrams = [];
+        for ($i = 0; $i < $length - 1; $i++) {
+            $bigrams[] = mb_substr($text, $i, 2, 'UTF-8');
+        }
+
+        return array_values(array_unique($bigrams));
+    }
+
+    /**
+     * Menghitung koefisien Sørensen-Dice Similarity berbasis character bigram.
+     *
+     * DS(A, B) = (2 * |A ∩ B|) / (|A| + |B|)
+     */
+    public function sorensenDice(string $textA, string $textB): float
+    {
+        $textA = trim($textA);
+        $textB = trim($textB);
+
+        if ($textA === '' || $textB === '') {
+            return 0.0;
+        }
+
+        if ($textA === $textB) {
+            return 1.0;
+        }
+
+        return $this->diceFromBigrams(
+            $this->generateBigrams($textA),
+            $this->generateBigrams($textB)
+        );
+    }
+
+    /**
+     * Menghitung Dice dari dua himpunan bigram yang sudah terbentuk.
+     */
+    protected function diceFromBigrams(array $bigramsA, array $bigramsB): float
+    {
+        $countA = count($bigramsA);
+        $countB = count($bigramsB);
+
+        if ($countA === 0 || $countB === 0) {
+            return 0.0;
+        }
+
+        $countIntersection = count(array_intersect($bigramsA, $bigramsB));
+
+        return (2.0 * $countIntersection) / ($countA + $countB);
+    }
+
+    /**
+     * Mengurutkan seluruh pertanyaan di knowledge base berdasarkan skor Sørensen-Dice
+     * terhadap input yang sudah diproses. Nilai priority hanya dipakai sebagai pemutus seri.
+     *
+     * @return array<int, array{item: KnowledgeBase, score: float}>
+     */
+    public function rankKnowledgeBase(string $processedInput, ?int $limit = null): array
+    {
+        if ($processedInput === '') {
+            return [];
+        }
+
+        $inputBigrams = $this->generateBigrams($processedInput);
+        $ranking = [];
+
+        foreach ($this->getProcessedKnowledgeBase() as $entry) {
+            $score = ($processedInput === $entry['processed'])
+                ? 1.0
+                : $this->diceFromBigrams($inputBigrams, $entry['bigrams']);
+
+            $ranking[] = [
+                'item' => $entry['item'],
+                'score' => $score,
+            ];
+        }
+
+        usort($ranking, function (array $a, array $b) {
+            if ($a['score'] === $b['score']) {
+                return $b['item']->priority <=> $a['item']->priority;
+            }
+
+            return $b['score'] <=> $a['score'];
+        });
+
+        return $limit !== null ? array_slice($ranking, 0, $limit) : $ranking;
+    }
+
+    /**
+     * Memuat knowledge base aktif beserta hasil preprocessing dan bigram-nya (di-cache).
+     */
+    protected function getProcessedKnowledgeBase(): array
+    {
+        if ($this->processedKnowledgeBase === null) {
+            $this->processedKnowledgeBase = [];
+
+            foreach (KnowledgeBase::where('is_active', true)->get() as $item) {
+                $processed = $this->preprocess($item->question);
+
+                if ($processed === '') {
+                    continue;
+                }
+
+                $this->processedKnowledgeBase[] = [
+                    'item' => $item,
+                    'processed' => $processed,
+                    'bigrams' => $this->generateBigrams($processed),
+                ];
+            }
+        }
+
+        return $this->processedKnowledgeBase;
+    }
+
+    /**
+     * Membentuk respons fallback terstruktur.
+     */
+    protected function buildFallback(float $confidence, float $score = 0.0): array
+    {
         return [
             'status' => 'fallback',
             'answer' => $this->getFallbackResponse(),
             'category' => null,
-            'confidence' => 0,
-            'question_matched' => null
+            'confidence' => $confidence,
+            'question_matched' => null,
+            'score' => $score,
         ];
     }
 
     /**
-     * Deteksi Conversational Intent (Sapaan, Ucapan Terima Kasih, Pengakuan/OK, Identitas Bot, Pamitan, Pujian)
+     * Template respons fallback saat skor similarity tidak mencapai threshold.
      */
-    protected function checkConversationalIntent(string $userInput): ?array
+    public function getFallbackResponse(): string
     {
-        $clean = strtolower(trim(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $userInput)));
-        $clean = preg_replace('/\s+/', ' ', $clean);
-
-        if (empty($clean)) {
-            return null;
-        }
-
-        // Ekstraksi token untuk memastikan tidak ada pertanyaan substantif yang terpotong
-        $tokens = $this->extractCanonicalTokens($userInput);
-        $hasSubstantive = false;
-        foreach ($tokens as $t) {
-            if (in_array($t, $this->substantiveKeywords)) {
-                $hasSubstantive = true;
-                break;
-            }
-        }
-
-        // Jika mengandung pertanyaan substantif magang (misal: "makasih min tapi syaratnya apa"),
-        // lewati conversational intent dan teruskan ke Knowledge Base!
-        if ($hasSubstantive) {
-            return null;
-        }
-
-        // 1. Ucapan Terima Kasih (Gratitude: "oke terima kasih yak", "makasih min", "thanks ya", "trm ksh", dll.)
-        if (preg_match('/\b(terima\s*kasih|terimakasih|trm\s*ksh|makasih|makasi|mksih|thanks|thank\s*you|thx|tengkyu|ty|matur\s*nuwun|syukron|hatur\s*nuhun|nuhun)\b/i', $clean)) {
-            return [
-                'status' => 'success',
-                'answer' => "Sama-sama! 😊 Senang bisa membantu Anda.<br><br>Jika masih ada hal lain yang ingin ditanyakan seputar program magang di Diskominfosantik Kabupaten Bekasi, silakan ketik langsung ya. Semoga sukses selalu! 🚀",
-                'category' => 'Ucapan Terima Kasih',
-                'confidence' => 98,
-                'question_matched' => 'Ungkapan Terima Kasih'
-            ];
-        }
-
-        // 2. Identitas Bot & Kemampuan (Bot Persona / Capabilities: "kamu siapa", "kamu bot siapa", "bot apa ini", "bisa apa")
-        if ((preg_match('/\b(siapa|bisa\s*apa|bantu\s*apa|tentang\s*bot|tugasmu)\b/i', $clean) && preg_match('/\b(kamu|bot|asisten|anda|sistem|lu)\b/i', $clean)) ||
-            preg_match('/\b(siapa\s*kamu|kamu\s*siapa|nama\s*kamu|bot\s*apa)\b/i', $clean)) {
-            return [
-                'status' => 'success',
-                'answer' => "Saya adalah <strong>Asisten Virtual SIMAGANG</strong> 🤖 milik Dinas Komunikasi, Informatika, dan Statistik (Diskominfosantik) Kabupaten Bekasi.<br><br>Tugas saya adalah menjawab pertanyaan seputar program kerja praktik/magang mahasiswa dan siswa SMK secara otomatis 24/7 menggunakan kecerdasan buatan pemrosesan bahasa alami (NLP).",
-                'category' => 'Profil & Identitas Bot',
-                'confidence' => 95,
-                'question_matched' => 'Identitas Asisten Virtual'
-            ];
-        }
-
-        // 3. Pujian & Apresiasi ("keren", "pinter banget", "hebat", "bagus", "mantap bot")
-        if (preg_match('/\b(keren|hebat|pinter|pintar|smart|top)\b/i', $clean)) {
-            return [
-                'status' => 'success',
-                'answer' => "Terima kasih banyak atas apresiasinya! 😊 Saya terus berusaha memberikan informasi yang cepat dan akurat seputar program magang Diskominfosantik. Ada hal lain yang ingin kamu ketahui?",
-                'category' => 'Apresiasi & Pujian',
-                'confidence' => 95,
-                'question_matched' => 'Apresiasi Pengguna'
-            ];
-        }
-
-        // 4. Ingin Bertanya / Pembuka Pertanyaan ("aku mau tnya", "mau nanya dong", "boleh tanya ga", "izin bertanya", "nanya dong", "tanya min")
-        if (preg_match('/\b(tnya|tanya|nanya|bertanya|tny|tanya2|nanya2)\b/i', $clean) ||
-            preg_match('/\b(mau|pengen|ingin|boleh|bisa|mo|izin|ijin|kalo|kalau)\s*(tnya|tanya|nanya|bertanya|tny)\b/i', $clean)) {
-            return [
-                'status' => 'success',
-                'answer' => "Boleh banget! 😊 Silakan tanyakan apa saja yang ingin kamu ketahui seputar program magang di <strong>Diskominfosantik Kabupaten Bekasi</strong>, seperti:<br><br>• 📋 <strong>Persyaratan Berkas & Kriteria</strong><br>• 🔄 <strong>Alur & Prosedur Pendaftaran</strong><br>• ⏱️ <strong>Durasi Magang & Jam Kerja</strong><br>• 💼 <strong>Pilihan Divisi & Sisa Kuota</strong><br>• 🍱 <strong>Fasilitas, Kantin & Pakaian</strong><br><br>Ketik langsung pertanyaanmu ya, saya siap membantu! 💬",
-                'category' => 'Bantuan Tanya Jawab',
-                'confidence' => 98,
-                'question_matched' => 'Permohonan Bertanya'
-            ];
-        }
-
-        // 5. Persetujuan & Respon Positif ("oke", "siap min mantap", "baik", "sip", "noted", "paham", "mantul")
-        if (preg_match('/\b(oke|ok|okey|okay|siap|baik|sip|noted|paham|ngerti|mantap|mantul)\b/i', $clean)) {
-            return [
-                'status' => 'success',
-                'answer' => "Siap! 👍 Jika nanti butuh informasi lebih lanjut seputar program magang Diskominfosantik, jangan ragu untuk bertanya kembali ya. Semangat dan sukses selalu! 😊✨",
-                'category' => 'Persetujuan & Respon',
-                'confidence' => 98,
-                'question_matched' => 'Konfirmasi Percakapan'
-            ];
-        }
-
-        // 5. Sapaan / Greetings (halo, hai, assalamualaikum, selamat pagi, etc.)
-        $greetings = [
-            'halo', 'halo min', 'halo kak', 'halo admin', 'halo bot',
-            'hai', 'hai min', 'hai kak', 'hai admin', 'hai bot',
-            'hello', 'helo', 'hei', 'hey', 'hi',
-            'selamat pagi', 'selamat siang', 'selamat sore', 'selamat malam',
-            'pagi', 'siang', 'sore', 'malam',
-            'assalamualaikum', 'assalamu alaikum', 'assalamu alaikuum', 'kulonuwun', 'permisi', 'punten',
-            'tes', 'test', 'ping', 'p'
-        ];
-
-        $isGreetingPattern = in_array($clean, $greetings) || 
-            preg_match('/^(halo|hai|hello|hei|hey|assalamu\s*alaikum|selamat\s*(pagi|siang|sore|malam)|permisi|punten)\b/i', $clean);
-
-        if ($isGreetingPattern) {
-            return [
-                'status' => 'success',
-                'answer' => "Halo! 👋 Selamat datang di Layanan Informasi <strong>SIMAGANG Diskominfosantik Kab. Bekasi</strong>.<br><br>Saya siap membantu Anda memberikan informasi resmi seputar:<br>• 📋 <strong>Persyaratan Pendaftaran & Berkas</strong><br>• 🔄 <strong>Alur & Prosedur Registrasi</strong><br>• ⏱️ <strong>Durasi & Waktu Pelaksanaan</strong><br>• 💼 <strong>Divisi yang Tersedia & Kuota</strong><br>• 🍱 <strong>Fasilitas, Kantin & Pakaian</strong><br><br>Silakan tanyakan langsung apa yang ingin Anda ketahui atau klik tombol opsi pertanyaan cepat di bawah ya! 😊",
-                'category' => 'Sapaan & Bantuan',
-                'confidence' => 98,
-                'question_matched' => 'Sapaan / Salam Pembuka'
-            ];
-        }
-
-        // 6. Pamitan / Closing (dadah, bye, sampai jumpa)
-        $byePhrases = [
-            'dadah', 'dadaah', 'bye', 'goodbye', 'sampai jumpa', 'selamat tinggal', 'pamit', 'bye bye'
-        ];
-        if (in_array($clean, $byePhrases) || preg_match('/\b(dadah|dadaah|bye\s*bye|sampai\s*jumpa|selamat\s*tinggal|pamit)\b/i', $clean)) {
-            return [
-                'status' => 'success',
-                'answer' => "Sampai jumpa! 👋 Semoga harimu menyenangkan dan proses kegiatan magangmu di Diskominfosantik berjalan lancar!",
-                'category' => 'Penutup / Pamitan',
-                'confidence' => 95,
-                'question_matched' => 'Salam Penutup'
-            ];
-        }
-
-        return null;
-    }
-
-    /**
-     * Tokenisasi & Normalisasi Kanonikal (Lemmatization Sederhana)
-     */
-    public function extractCanonicalTokens(string $text): array
-    {
-        $text = strtolower($text);
-        $text = preg_replace('/[^a-z0-9\s]/', ' ', $text);
-        $text = preg_replace('/\s+/', ' ', trim($text));
-
-        $words = array_filter(explode(' ', $text));
-        $canonicalTokens = [];
-
-        foreach ($words as $rawWord) {
-            // Cek stopword terlebih dahulu
-            if (in_array($rawWord, $this->stopwords)) {
-                continue;
-            }
-
-            $word = $rawWord;
-            // Normalisasi enclitic suffix Indonesia (-nya, -lah, -kah) jika memiliki bentuk dasar
-            if (strlen($word) > 5 && (str_ends_with($word, 'nya') || str_ends_with($word, 'lah') || str_ends_with($word, 'kah'))) {
-                $stripped = substr($word, 0, -3);
-                if (isset($this->canonicalMap[$stripped]) || in_array($stripped, $this->substantiveKeywords)) {
-                    $word = $stripped;
-                }
-            }
-
-            // Normalisasi ke bentuk kata kanonikal jika ada di kamus
-            if (isset($this->canonicalMap[$word])) {
-                $canonicalTokens[] = $this->canonicalMap[$word];
-            } else {
-                $canonicalTokens[] = $word;
-            }
-        }
-
-        return array_values(array_unique($canonicalTokens));
-    }
-
-    private function findBestMatch(array $inputTokens, string $originalInput): ?object
-    {
-        $knowledgeBase = KnowledgeBase::where('is_active', true)->get();
-
-        if ($knowledgeBase->isEmpty() || empty($inputTokens)) {
-            return null;
-        }
-
-        $bestMatch = null;
-        $bestScore = 0;
-        $inputTokensString = implode(' ', $inputTokens);
-
-        foreach ($knowledgeBase as $item) {
-            $kbTokens = $this->extractCanonicalTokens($item->question);
-            if (empty($kbTokens)) {
-                continue;
-            }
-
-            $kbTokensString = implode(' ', $kbTokens);
-
-            // 1. Base String Similarity pada Canonical Representation
-            similar_text($inputTokensString, $kbTokensString, $simPercent);
-            $score = $simPercent * 0.5; // Max 50 pts
-
-            // 2. Irisan Kata Kunci (Keyword Intersect)
-            $commonTokens = array_intersect($inputTokens, $kbTokens);
-            
-            // Hitung bobot substantive vs generic helper verbs
-            $substantiveMatchCount = 0;
-            $genericMatchCount = 0;
-
-            foreach ($commonTokens as $tok) {
-                if (in_array($tok, $this->substantiveKeywords)) {
-                    $substantiveMatchCount++;
-                } else {
-                    $genericMatchCount++;
-                }
-            }
-
-            // Substantive keyword bernilai tinggi (+30 poin per kata kunci topik)
-            $score += ($substantiveMatchCount * 30);
-            
-            // Helper verb (seperti 'dapat') bernilai kecil (+5 poin)
-            $score += ($genericMatchCount * 5);
-
-            // 3. Penalti proporsional jika input punya kata kunci substantif yang berbeda
-            $inputSubstantive = array_intersect($inputTokens, $this->substantiveKeywords);
-            $kbSubstantive = array_intersect($kbTokens, $this->substantiveKeywords);
-            
-            $unmatchedInputSubstantive = array_diff($inputSubstantive, $kbSubstantive);
-            if (!empty($unmatchedInputSubstantive)) {
-                if ($substantiveMatchCount === 0) {
-                    $score -= (count($unmatchedInputSubstantive) * 20);
-                } else {
-                    $score -= (count($unmatchedInputSubstantive) * 5);
-                }
-            }
-
-            // 4. Bonus jika semua kata kunci KB tercover oleh input
-            if (!empty($kbSubstantive) && count(array_diff($kbSubstantive, $inputTokens)) === 0) {
-                $score += 25;
-            }
-
-            // 5. Penalti khusus: Jika hanya helper verb 'dapat' yang cocok tanpa kata kunci topik lain
-            if ($substantiveMatchCount === 0 && $genericMatchCount > 0) {
-                $score = min($score, 35); // Batasi di bawah threshold
-            }
-
-            // Tambahkan bobot prioritas admin
-            $score += ($item->priority ?? 0) * 3;
-
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $bestMatch = $item;
-                $bestMatch->score = $score;
-                $bestMatch->confidence = min(max(round($score), 0), 100);
-            }
-        }
-
-        // Thresholding: Hanya terima match jika skor >= 55% dan setidaknya ada relevansi substantif
-        if ($bestScore < 55) {
-            return null;
-        }
-
-        return $bestMatch;
-    }
-
-    private function getFallbackResponse(): string
-    {
-        return 'Maaf, saya tidak memahami maksud pertanyaan Anda. 🙏 Informasi yang Anda tanyakan belum tersedia di basis pengetahuan kami. Untuk informasi lebih lanjut, silakan hubungi admin kami di (021) 8895-1234 ext. 456 atau email ke magang@diskominfosantik.bekasikota.go.id.';
+        return 'Maaf, saya tidak memahami maksud pertanyaan Anda seputar program magang di Diskominfosantik Kabupaten Bekasi. 🤔<br><br>' .
+               'Silakan ajukan pertanyaan menggunakan kata kunci yang lebih spesifik, seperti:<br>' .
+               '• <em>"Apa saja syarat berkas magang?"</em><br>' .
+               '• <em>"Bagaimana alur prosedur pengajuan magang?"</em><br>' .
+               '• <em>"Berapa lama durasi magang?"</em><br>' .
+               '• <em>"Berapa jam kerja operasional kantor?"</em><br>' .
+               '• <em>"Apakah magang mendapatkan uang saku atau gaji?"</em><br>' .
+               '• <em>"Dimana alamat dan lokasi kantor Diskominfosantik?"</em><br>' .
+               '• <em>"Berapa sisa kuota penerimaan magang?"</em>';
     }
 }
